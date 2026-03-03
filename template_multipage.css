@@ -1,0 +1,47 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    margin: 0; background: #e0e4eb; color: #333;
+    line-height: 1.25; 
+    font-size: 9pt; 
+}
+@page {
+    size: A4;
+    margin: 15mm 20mm 15mm 20mm;
+}
+.a4-page {
+    max-width: 186mm; padding: 15px 0; 
+    box-sizing: border-box; background: #fff; margin: 20px auto;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+}
+@media print {
+    body { background: #fff; }
+    .a4-page { box-shadow: none; margin: 0; padding: 0; max-width: none; width: 100%; min-height: auto; }
+    li { page-break-inside: avoid !important; break-inside: avoid !important; }
+    .section-title, .item-header { page-break-after: avoid !important; break-after: avoid !important; }
+}
+.header { text-align: center; margin-bottom: 2px; border-bottom: 2px solid #3B50D9; padding-bottom: 4px; }
+.header h1 { font-size: 21pt; color: #3B50D9; margin: 0 0 2px 0; letter-spacing: 2px; }
+.header p { margin: 2px 0; font-size: 10pt; color: #444; }
+.section-title {
+    display: inline-flex; background: linear-gradient(135deg, #3B50D9 0%, #5268E8 100%);
+    clip-path: polygon(0 0, 100% 0, calc(100% - 15px) 100%, 0 100%);
+    position: relative; padding: 3px 18px 3px 8px; margin: 4px 0 3px 0;
+}
+.section-title::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background-color: #2a3cb0; }
+.section-title h2 { color: #fff; margin: 0; font-size: 11.5pt; letter-spacing: 1px; line-height: 1.2; }
+.section-content { border-left: 2px solid #3B50D9; padding-left: 8px; margin-left: 2px; margin-bottom: 4px; }
+ul { padding-left: 1.2em; margin: 2px 0 2px 0; }
+li { list-style: none; position: relative; margin-bottom: 2px; text-align: justify; }
+li::before { content: '➤'; color: #3B50D9; position: absolute; left: -1.2em; top: 1px; font-size: 0.8em; }
+.item { margin-bottom: 5px; }
+.item:last-child { margin-bottom: 0; }
+.item-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2px; }
+.item-title { font-size: 10pt; color: #3B50D9; font-weight: bold; }
+.item-org { font-size: 9.5pt; color: #444; font-weight: bold; margin-left: 6px; }
+.item-date { font-size: 9.5pt; color: #3B50D9; font-weight: bold; white-space: nowrap; }
+.item-desc { font-style: italic; color: #555; margin-bottom: 2px; font-size: 8.5pt; }
+.k { color: #111; font-weight: 800; border-bottom: 1px solid rgba(59, 80, 217, 0.3); }
+.edu-item { margin-bottom: 3px; }
+.edu-header { display: flex; justify-content: space-between; align-items: baseline; }
+.edu-school { font-weight: 800; color: #222; font-size: 10pt; }
+.edu-major { font-weight: bold; color: #444; }
