@@ -26,7 +26,7 @@
 ### Method A: AI Agent Fully Automated Flow (Highly Recommended ✨)
 If you are using an AI coding assistant such as `Antigravity`, `Cursor`, `Codex`, or `Claude Code`, you **don't need to** manually configure or run anything! Simply tell the AI the following "spell" in this directory:
 
-> *"Please read my old resume, invoke the `SKILL.md` here, use the [Multi-Page Comfortable] (or [Single-Page Compact]) template to regenerate a beautiful resume named `my_new_resume.pdf`, and automatically execute all environment setup commands."*
+> *"Please read my old resume, invoke the `SKILL.md` here, use the [Multi-Page] (or [Single-Page]) template to regenerate a beautiful resume named `my_new_resume.pdf`, and automatically execute all environment setup commands."*
 
 The AI assistant will automatically read the `SKILL.md` in this repo, and handle the entire workflow for you — understanding your content, fetching CSS, writing HTML, configuring Python dependencies, and running the script — delivering a ready-made PDF straight to your hands!
 
@@ -48,6 +48,17 @@ Place the AI-generated `resume.html` in this directory and run:
 python builder.py resume.html
 ```
 You will get a `resume.pdf` right in this directory, featuring flawless multi-page, auto line-break, anti-truncation Blue-Purple layout!
+
+---
+
+## ✨ What's New in v1.1.0
+
+- **Adaptive Single-Page Layout Engine**: Added Step 2.5 with browser-based overflow detection and a 5-level progressive degradation strategy (L1–L5) that automatically adjusts line merging → column layouts → padding → font sizes → user prompt.
+- **Dynamic Font-Size Injection**: Single-page CSS templates no longer preset `font-size`. The AI determines optimal sizes per content volume, maintaining a clear hierarchy (`h1 >> h2 > item-title ≥ body`, floor: 10pt).
+- **Section-Level Column Layout**: New `.section-2col` / `.section-3col` CSS classes for column layout of entire sections — column count equals the number of sub-headings.
+- **Line-Height Floor Lock**: Line-height is locked at ≥ 1.5 and excluded from any degradation strategy.
+- **Windows Encoding Fix**: Added `PYTHONIOENCODING=utf-8` to prevent GBK encoding errors on Windows.
+- **Non-Blocking Server**: HTTP server for overflow verification runs as fire-and-forget to avoid long blocking timeouts.
 
 ---
 
