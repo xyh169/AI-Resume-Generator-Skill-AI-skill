@@ -20,13 +20,13 @@ This workflow acts as a Master Workflow scheduler, connecting the following thre
 ## 📦 Directory Structure
 
 ```text
-resume-pipeline/
-├── SKILL.md                 ← Core Orchestration Entry Point
 ├── README.md                ← This English Document
 ├── README_CN.md             ← Chinese Document Version
-├── 1-template-to-md/        ← Stage 1: High-Tolerance Format Parsing & Conversion
-├── 2-transcriptor/          ← Stage 2: JD-Matched Content Denoising & Restructuring
-└── 3-pdf-generator/         ← Stage 3: Adaptive A4 Layout Rendering & PDF Export
+└── resume-pipeline/         ← Core Pipeline Directory
+    ├── SKILL.md                 ← Master Orchestration Entry Point
+    ├── 1-template-to-md/        ← Stage 1: High-Tolerance Format Parsing & Conversion
+    ├── 2-transcriptor/          ← Stage 2: JD-Matched Content Denoising & Restructuring
+    └── 3-pdf-generator/         ← Stage 3: Adaptive A4 Layout Rendering & PDF Export
 ```
 
 ## ✨ What's New in v2.0.0 (Major Update)

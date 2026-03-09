@@ -20,12 +20,13 @@
 ## 📦 目录结构
 
 ```text
-resume-pipeline/
-├── SKILL.md                 ← 核心编排入口文件
-├── README.md                ← 本文档
-├── 1-template-to-md/        ← 阶段一：高容错流式格式洗稿转换
-├── 2-transcriptor/          ← 阶段二：JD 匹配型内容专业化重写
-└── 3-pdf-generator/         ← 阶段三：自适应 A4 PDF 渲染导出
+├── README.md                ← 英文版说明文档
+├── README_CN.md             ← 本中文说明文档
+└── resume-pipeline/         ← 核心流水线主目录
+    ├── SKILL.md                 ← 总控编排入口文件
+    ├── 1-template-to-md/        ← 阶段一：高容错流式格式洗稿转换
+    ├── 2-transcriptor/          ← 阶段二：JD 匹配型内容专业化重写
+    └── 3-pdf-generator/         ← 阶段三：自适应 A4 PDF 渲染导出
 ```
 
 ## ✨ v2.0.0 重大更新日志 (What's New)
