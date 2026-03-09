@@ -1,66 +1,71 @@
-# AI Resume Generator Skill | AI 简历自动生成Skill
+# Resume Pipeline — Fully Automated Resume Generation Workflow
 
 <p align="center">
   <b>🌏 Language / 语言</b><br>
-  <a href="./README.md">English</a> | <a href="./README_CN.md">简体中文</a>
+  English | <a href="README_CN.md">简体中文</a>
 </p>
 
-> An AI-Native, beautifully crafted A4 Resume framework. Turns your messy notes into stunning PDF resumes.
+> An Agentic AI-driven, one-click end-to-end resume generation orchestration. Whether you input Word, PDF, HTML, plain text, or even highly colloquial **chat history and voice transcripts**, this workflow can transform the raw materials into a highly professional, beautifully typeset Blue-Purple style A4 PDF resume.
 
-## 🎯 Core Features
-- **AI-Powered Transformation**: Includes a specially crafted Super System Prompt that guides LLMs to extract key information and output cross-page HTML strictly conforming to the CSS styles.
-- **Smart Page Break**: Perfectly solves the common HTML-to-PDF issues of list truncation and excessive whitespace, ensuring every page has pixel-perfect margins.
-- **One-Click Rendering**: Paired with a Playwright headless pipeline, enabling zero-config A4 PDF export from the terminal.
+## 🎯 Core Architecture & Features Overview
+
+This workflow acts as a Master Workflow scheduler, connecting the following three deeply enhanced, independent skills in a fixed sequence to provide an **end-to-end** solution from format parsing to typesetting rendering.
+
+| Stage | Core Module | Advanced Features & Mechanisms |
+|------|---------|--------------------|
+| **1** | `1-template-to-md` | **Universal Format Support**: Fully supports parsing `PDF`, `DOCX`, `TXT`, `HTML`, `RTF`, `TEX`, and can even directly ingest **colloquial plain text / chat records / voice transcripts**.<br>Equipped with **5 Error Retries** and a **Multi-Strategy Fallback System** (e.g., PDF conversion prioritizes `pymupdf4llm`, falls back to native `PyMuPDF` on failure, and uses `pdfplumber` as a last resort; HTML and DOCX also have corresponding automatic fallback routing). Supports automatic installation of missing packages and binary tools. |
+| **2** | `2-transcriptor` | **Automated Denoising & Professional Restructuring Engine**. Based on the user-provided target role/company, it automatically retrieves the latest Job Description (JD) from the web for deep matching. Leverages the **STAR method** to eliminate fluff, utilizes standardized professional action verbs (e.g., "Spearheaded", "Directed"), and strictly manages information boundaries (e.g., isolating honors and awards into separate sections). |
+| **3** | `3-pdf-generator` | **Single/Multi-Page PDF Dynamic Typesetting Engine**. Built-in browser-based height detection monitors the A4 page's overflow/whitespace status. For the Single-Page Extreme version, it provides a **Dynamic Adaptive Layout Algorithm** (adjusting font size, margins, and column layouts) to hit the exact `90%-95%` optimal page space utilization rate, while **strictly upholding** the visual red line of a minimum line-height of `1.5`. |
 
 ## 📦 Directory Structure
-- `prompt_workflow.md`: The Super Prompt (AI Skill) to feed to your LLM (e.g., Cursor / Claude / ChatGPT). Just throw in your personal experience, and it will output perfect underlying HTML.
-- `template_1page.css`: An ultra-compact single-page A4 template, designed for scenarios where a one-page resume is required (e.g., investment banks, multinational companies). Maximizes space utilization.
-- `template_multipage.css`: A comfortable multi-page template with generous 20mm margins and physical page-break protection. Handles any length with natural cross-page layout.
-- `builder.py`: The main Python script for rendering and exporting PDFs.
-- `requirements.txt`: Python dependencies.
 
-## 🚀 Quick Start
-
-> **Requirement**: This project relies on Python for headless browser rendering. Please ensure `Python 3.8+` is installed on your machine.
-
-### Method A: AI Agent Fully Automated Flow (Highly Recommended ✨)
-If you are using an AI coding assistant such as `Antigravity`, `Cursor`, `Codex`, or `Claude Code`, you **don't need to** manually configure or run anything! Simply tell the AI the following "spell" in this directory:
-
-> *"Please read my old resume, invoke the `SKILL.md` here, use the [Multi-Page] (or [Single-Page]) template to regenerate a beautiful resume named `my_new_resume.pdf`, and automatically execute all environment setup commands."*
-
-The AI assistant will automatically read the `SKILL.md` in this repo, and handle the entire workflow for you — understanding your content, fetching CSS, writing HTML, configuring Python dependencies, and running the script — delivering a ready-made PDF straight to your hands!
-
-### Method B: Manual Execution
-*For situations without an AI coding assistant, relying only on a standard ChatGPT web interface to generate HTML.*
-
-**Step 1: Prepare Content**
-Open any web-based AI (e.g., ChatGPT), send it the contents of `prompt_workflow.md` from this directory, and request either the [Single-Page Compact] or [Multi-Page Comfortable] version to get an auto-generated `resume.html` file.
-
-### Step 2: Install Dependencies
-```bash
-pip install -r requirements.txt
-playwright install chromium
+```text
+resume-pipeline/
+├── SKILL.md                 ← Core Orchestration Entry Point
+├── README.md                ← This English Document
+├── README_CN.md             ← Chinese Document Version
+├── 1-template-to-md/        ← Stage 1: High-Tolerance Format Parsing & Conversion
+├── 2-transcriptor/          ← Stage 2: JD-Matched Content Denoising & Restructuring
+└── 3-pdf-generator/         ← Stage 3: Adaptive A4 Layout Rendering & PDF Export
 ```
 
-### Step 3: Generate PDF
-Place the AI-generated `resume.html` in this directory and run:
-```bash
-python builder.py resume.html
-```
-You will get a `resume.pdf` right in this directory, featuring flawless multi-page, auto line-break, anti-truncation Blue-Purple layout!
+## ✨ What's New in v2.0.0 (Major Update)
+
+Compared to the previous v1.x versions (which primarily focused on PDF generation and single-page adaptive layouts), v2.0.0 introduces a massive architectural upgrade:
+
+*   **From Single Script to 3-Skill Synergy Orchestration**: Upgraded from a standalone PDF generator to a complete pipeline featuring **Format Parsing (template-to-md) → Content Transcription & Denoising (transcriptor) → Dynamic Rendering (pdf-generator)**.
+*   **Universal Format Parsing**: Expanded input capabilities beyond just text. Now natively supports parsing and extracting data from `PDF`, `DOCX`, `TXT`, `HTML`, `RTF`, `TEX`, as well as parsing unstructured chat history and voice transcripts.
+*   **Native MCP Protocol Support**: The newly added parsing and transcribing modules now support the Standardized Model Context Protocol (MCP). They can be directly mounted as independent server tools in AI IDEs like Cursor and Claude Desktop.
 
 ---
 
-## ✨ What's New in v1.1.0
+### Previous Updates (v1.1.0)
+*   **Adaptive Single-Page Layout Engine**: Added Step 2.5 with browser-based overflow detection and a progressive degradation/expansion strategy.
+*   **Dynamic Font-Size Injection**: The AI determines optimal font sizes based on content volume, maintaining clear visual hierarchy.
+*   **Section-Level Column Layout**: Introduced CSS classes like `.section-2col` / `.section-3col` for automatic column alignment.
+*   **Line-Height Safe Limit**: Built-in lock prevents line-heights below 1.5 during dynamic compression.
 
-- **Adaptive Single-Page Layout Engine**: Added Step 2.5 with browser-based overflow detection and a 5-level progressive degradation strategy (L1–L5) that automatically adjusts line merging → column layouts → padding → font sizes → user prompt.
-- **Dynamic Font-Size Injection**: Single-page CSS templates no longer preset `font-size`. The AI determines optimal sizes per content volume, maintaining a clear hierarchy (`h1 >> h2 > item-title ≥ body`, floor: 10pt).
-- **Section-Level Column Layout**: New `.section-2col` / `.section-3col` CSS classes for column layout of entire sections — column count equals the number of sub-headings.
-- **Line-Height Floor Lock**: Line-height is locked at ≥ 1.5 and excluded from any degradation strategy.
-- **Windows Encoding Fix**: Added `PYTHONIOENCODING=utf-8` to prevent GBK encoding errors on Windows.
-- **Non-Blocking Server**: HTTP server for overflow verification runs as fire-and-forget to avoid long blocking timeouts.
+
+## 🚀 Recommended Integration & Usage
+
+### Option A: AI Agent Fully Automated Mode (Recommended ✨)
+
+In any IDE or application equipped with Agent capabilities (e.g., Cursor, Claude Desktop, Antigravity), issue the following prompt:
+
+> *"Please read `resume-pipeline/SKILL.md` and use the raw materials (attachments, text) I provided to automatically generate a resume. The target position is [Company Name + Role / Specific JD Text]. Please render it as a single-page/multi-page PDF."*
+
+The AI will automatically prospect the JD, restructure colloquial descriptions, and transparently fix the layout by running testing server measurements on-the-fly when encountering page overflow or excessive whitespace.
+
+### Option B: Integration as Standardized MCP Servers 🔌
+
+Our underlying capabilities support the Model Context Protocol (MCP). You can directly mount them as independent services (with built-in error retry and fallback systems) in your toolchain.
+Ensure you have the `uv` package manager installed. Using Cursor as an example:
+- **Format Parsing (`convert_file_to_md`)**: `uvx --from "/Your_Absolute_Path/1-template-to-md/mcp-server" mcp-template-to-md`
+- **Content Restructuring (`transcriptor-agent`)**: `uvx --from "/Your_Absolute_Path/2-transcriptor/mcp-server" mcp-transcriptor`
+
+*(For more advanced parameters, execution protocols, and system prompt configurations, please closely read the `SKILL.md` files within their respective sub-directories.)*
 
 ---
 
 ## 📄 License
-GLP-3.0
+GPL-3.0
