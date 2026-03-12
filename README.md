@@ -15,7 +15,7 @@ This workflow acts as a Master Workflow scheduler, connecting the following thre
 |------|---------|--------------------|
 | **1** | `1-template-to-md` | **Universal Format Support**: Fully supports parsing `PDF`, `DOCX`, `TXT`, `HTML`, `RTF`, `TEX`, and can even directly ingest **colloquial plain text / chat records / voice transcripts**.<br>Equipped with **5 Error Retries** and a **Multi-Strategy Fallback System** (e.g., PDF conversion prioritizes `pymupdf4llm`, falls back to native `PyMuPDF` on failure, and uses `pdfplumber` as a last resort; HTML and DOCX also have corresponding automatic fallback routing). Supports automatic installation of missing packages and binary tools. |
 | **2** | `2-transcriptor` | **Automated Denoising & Professional Restructuring Engine**. Based on the user-provided target role/company, it automatically retrieves the latest Job Description (JD) from the web for deep matching. Leverages the **STAR method** to eliminate fluff, utilizes standardized professional action verbs (e.g., "Spearheaded", "Directed"), and strictly manages information boundaries (e.g., isolating honors and awards into separate sections). |
-| **3** | `3-pdf-generator` | **Single/Multi-Page PDF Dynamic Typesetting Engine**. Built-in browser-based height detection monitors the A4 page's overflow/whitespace status. For the Single-Page Extreme version, it provides a **Dynamic Adaptive Layout Algorithm** (adjusting font size, margins, and column layouts) to hit the exact `90%-95%` optimal page space utilization rate, while **strictly upholding** the visual red line of a minimum line-height of `1.5`. |
+| **3** | `3-pdf-generator` | **Single/Multi-Page PDF Dynamic Typesetting Engine**. Built-in browser-based height detection monitors the A4 page's overflow/whitespace status. For the Single-Page Extreme version, it provides a **Dynamic Adaptive Layout Algorithm** (adjusting font size, margins, and column layouts) to hit the exact `90%-95%` optimal page space utilization rate, while **ensuring** a minimum line-height of `1.5`. |
 
 ## 📦 Directory Structure
 
@@ -29,9 +29,20 @@ This workflow acts as a Master Workflow scheduler, connecting the following thre
     └── 3-pdf-generator/         ← Stage 3: Adaptive A4 Layout Rendering & PDF Export
 ```
 
-## ✨ What's New in v2.0.0 (Major Update)
+## ✨ What's New in v2.1.0
 
-Compared to the previous v1.x versions (which primarily focused on PDF generation and single-page adaptive layouts), v2.0.0 introduces a massive architectural upgrade:
+This release focuses on typesetting engine logic refinement and ATS (Applicant Tracking System) compatibility enhancements:
+
+*   **ATS-Compatible Standardized Section Titles**: Introduced a comprehensive Chinese/English ATS standard title mapping table and selection rules in `2-transcriptor`. Ensures all output section titles (e.g., "Education", "Projects", "Skills") are 100% parseable by mainstream applicant tracking systems and AI resume scoring engines, eliminating information loss or score penalties caused by non-standard headings.
+*   **Optimized Layout Logic & Ordering**: Refactored the degradation/expansion strategy execution order and closed-loop verification flow in `3-pdf-generator`. Introduced a "Degrade-then-Backfill" closed-loop mechanism (L1→L2→L3→L4 progressive degradation, with automatic E1–E4 expansion triggered if usage drops too low), ensuring page utilization converges to the 93%–98% sweet spot before PDF export — preventing both over-compression and excessive whitespace.
+*   **User Parameter Guidance & Transparent Choices**: Improved the workflow entry's user interaction — only presenting "Single-Page Extreme" and "Multi-Page Comfortable" as layout options, with the system automatically determining content feasibility. Users no longer need to guess whether their content fits on one page. Also refined the loop termination messaging to provide clear actionable suggestions.
+*   **Section Content Type Annotation System**: Added `<!-- type: narrative -->` and `<!-- type: data -->` annotation conventions, enabling the Transcriptor's output to be precisely recognized by the downstream PDF engine for intelligent column layout decisions — narrative sections never use columns, data sections adopt columns on demand.
+
+---
+
+### Previous Major Updates (v2.0.0)
+
+Compared to the previous v1.x versions (which primarily focused on PDF generation and single-page adaptive layouts), v2.0.0 introduces a major architectural upgrade:
 
 *   **From Single Script to 3-Skill Synergy Orchestration**: Upgraded from a standalone PDF generator to a complete pipeline featuring **Format Parsing (template-to-md) → Content Transcription & Denoising (transcriptor) → Dynamic Rendering (pdf-generator)**.
 *   **Universal Format Parsing**: Expanded input capabilities beyond just text. Now natively supports parsing and extracting data from `PDF`, `DOCX`, `TXT`, `HTML`, `RTF`, `TEX`, as well as parsing unstructured chat history and voice transcripts.
@@ -54,7 +65,7 @@ In any IDE or application equipped with Agent capabilities (e.g., Cursor, Claude
 
 > *"Please read `resume-pipeline/SKILL.md` and use the raw materials (attachments, text) I provided to automatically generate a resume. The target position is [Company Name + Role / Specific JD Text]. Please render it as a single-page/multi-page PDF."*
 
-The AI will automatically prospect the JD, restructure colloquial descriptions, and transparently fix the layout by running testing server measurements on-the-fly when encountering page overflow or excessive whitespace.
+The AI will automatically retrieve the JD, restructure colloquial descriptions, and transparently fix the layout by running testing server measurements on-the-fly when encountering page overflow or excessive whitespace.
 
 ### Option B: Integration as Standardized MCP Servers 🔌
 

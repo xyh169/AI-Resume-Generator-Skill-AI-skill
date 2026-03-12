@@ -206,9 +206,8 @@ li::before {
     margin-left: 8px;
 }
 
-/* ===== 大模块分栏（Section 级别） ===== */
-/* 用于内含多个次级标题的整个 section-content */
-/* 栏数 = 次级标题数量 */
+/* ===== Section 内部分栏（单个 section 内多个子块） ===== */
+/* 用于单个 section-content 内含多个并列 .item 时的分栏 */
 .section-2col {
     column-count: 2;
     column-gap: 20px;
@@ -236,4 +235,30 @@ li::before {
 
 .section-3col-unequal .item {
     break-inside: avoid;
+}
+
+/* ===== 数据型 Section 并排（跨 Section 级别） ===== */
+/* 🔒 最多 3 栏。栏间距通过 CSS 变量 --col-gap 按字数动态注入 */
+/* 每个 .section 保留完整的 section-title + section-content 结构（ATS 友好） */
+.data-sections-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: var(--col-gap, 16px);
+    align-items: start;
+}
+
+.data-sections-row .section {
+    margin-bottom: 0;
+}
+
+/* 三栏并排变体（最多 3 个数据型 section 同行） */
+.data-sections-row-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    column-gap: var(--col-gap, 16px);
+    align-items: start;
+}
+
+.data-sections-row-3 .section {
+    margin-bottom: 0;
 }
