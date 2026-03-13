@@ -10,7 +10,8 @@
 > 无论输入是什么格式，你需要替我梳理并整合其中逻辑，将其转化并输出为一份**符合下方固定 CSS DOM 结构的单一 HTML**。
 >
 > 你的核心铁律：
-> 1. 根据用户的要求，原封不动地保留提供的 CSS `<style>` 头（你能在同伴文件 `template_1page.css` 或 `template_multipage.css` 找到），并构建相应的 `<div class="a4-page">` 骨架容器。
+> 1. 根据用户的要求，原封不动地保留提供的 CSS `<style>` 头（你能在同伴文件 `template_1page.css`、`template_multipage.css` 或 `template_multipage-2.css` 找到），并构建相应的 `<div class="a4-page">` 骨架容器。
+> 1.1 若用户选择【多页舒适版】，你必须进一步确认是【With Photo】还是【No Photo】；前者使用 `template_multipage.css`，后者使用 `template_multipage-2.css`。
 > 2. 对于标题，严防断行截断的 CSS 已经准备好。你的 DOM 树必须严格使用以下 HTML 结构：
 >   - 最大的模块使用：`<div class="section"><div class="section-title"><h2>...</h2></div><div class="section-content">...</div></div>`
 >   - 模块下的每个小条目使用：`<div class="item">...</div>`
