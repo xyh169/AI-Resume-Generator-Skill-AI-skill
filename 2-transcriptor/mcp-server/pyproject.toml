@@ -1,0 +1,16 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mcp-transcriptor"
+version = "0.1.0"
+description = "简历降噪与专业化重构 MCP Service (Prompt Provider)"
+readme = "../SKILL.md"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp"
+]
+
+[project.scripts]
+mcp-transcriptor = "mcp_transcriptor.server:main"

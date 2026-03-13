@@ -1,0 +1,26 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mcp-resume-pipeline"
+version = "1.0.0"
+description = "简历全流水线 MCP 统一入口：文档转换 → 内容重构 → PDF 渲染，暴露 Tools / Resources / Prompts"
+readme = "../SKILL.md"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp",
+    # Stage 1 deps
+    "pymupdf4llm",
+    "pymupdf",
+    "pdfplumber",
+    "python-docx",
+    "pypandoc",
+    "chardet",
+    "beautifulsoup4",
+    # Stage 3 deps
+    "playwright",
+]
+
+[project.scripts]
+mcp-resume-pipeline = "mcp_resume_pipeline.server:main"

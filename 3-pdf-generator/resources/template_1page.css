@@ -1,0 +1,264 @@
+/* ===== Blue-Purple 单页简历模板 ===== */
+/* 不设默认字体大小，由 AI 在 Step 2.5 根据内容量动态决定 */
+/* 字号层级约束：h1 > h2 > section-title > item-title ≥ body */
+/* 默认行距 1.5（范围 1.3–1.8） */
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    margin: 0;
+    background: #e0e4eb;
+    color: #333;
+    line-height: 1.5;
+    /* font-size 不在此设定，由 AI 动态注入 */
+}
+
+@page {
+    size: A4;
+    margin: 0;
+}
+
+.a4-page {
+    width: 210mm;
+    min-height: 297mm;
+    max-height: 297mm;
+    overflow: hidden;
+    padding: 12mm 15mm 12mm 15mm;
+    box-sizing: border-box;
+    background: #fff;
+    margin: 20px auto;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+}
+
+@media print {
+    body {
+        background: #fff;
+    }
+
+    .a4-page {
+        box-shadow: none;
+        margin: 0;
+        padding: 12mm 15mm 12mm 15mm;
+        min-height: auto;
+        max-height: 297mm;
+        overflow: hidden;
+    }
+
+    .item {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    .section-title,
+    .item-header {
+        page-break-after: avoid !important;
+        break-after: avoid !important;
+    }
+}
+
+/* ===== Header ===== */
+.header {
+    text-align: center;
+    margin-bottom: 4px;
+    border-bottom: 2px solid #3B50D9;
+    padding-bottom: 5px;
+}
+
+.header h1 {
+    /* h1 字号由 AI 动态设定，必须 > h2 */
+    color: #3B50D9;
+    margin: 0 0 3px 0;
+    letter-spacing: 2px;
+}
+
+.header p {
+    margin: 2px 0;
+    color: #444;
+}
+
+/* ===== Section Title（蓝紫渐变旗帜） ===== */
+.section-title {
+    display: inline-flex;
+    background: linear-gradient(135deg, #3B50D9 0%, #5268E8 100%);
+    clip-path: polygon(0 0, 100% 0, calc(100% - 15px) 100%, 0 100%);
+    position: relative;
+    padding: 3px 18px 3px 8px;
+    margin: 5px 0 4px 0;
+}
+
+.section-title::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background-color: #2a3cb0;
+}
+
+.section-title h2 {
+    color: #fff;
+    margin: 0;
+    /* h2 字号由 AI 动态设定，必须 < h1 且 ≥ item-title */
+    letter-spacing: 1px;
+    line-height: 1.2;
+}
+
+/* ===== Section Content（左侧蓝线） ===== */
+.section-content {
+    border-left: 2px solid #3B50D9;
+    padding-left: 8px;
+    margin-left: 2px;
+    margin-bottom: 4px;
+}
+
+/* ===== 列表 ===== */
+ul {
+    padding-left: 1.2em;
+    margin: 2px 0 2px 0;
+}
+
+li {
+    list-style: none;
+    position: relative;
+    margin-bottom: 2px;
+    text-align: justify;
+}
+
+li::before {
+    content: '➤';
+    color: #3B50D9;
+    position: absolute;
+    left: -1.2em;
+    top: 1px;
+    font-size: 0.8em;
+}
+
+/* ===== Item ===== */
+.item {
+    margin-bottom: 5px;
+}
+
+.item:last-child {
+    margin-bottom: 0;
+}
+
+.item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 2px;
+}
+
+.item-title {
+    color: #3B50D9;
+    font-weight: bold;
+    /* item-title 字号由 AI 动态设定，必须 ≤ h2 且 ≥ body */
+}
+
+.item-org {
+    color: #444;
+    font-weight: bold;
+    margin-left: 6px;
+}
+
+.item-date {
+    color: #3B50D9;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.item-desc {
+    font-style: italic;
+    color: #555;
+    margin-bottom: 2px;
+}
+
+/* ===== 关键词高亮 ===== */
+.k {
+    color: #111;
+    font-weight: 800;
+    border-bottom: 1px solid rgba(59, 80, 217, 0.3);
+}
+
+/* ===== 教育背景 ===== */
+.edu-item {
+    margin-bottom: 3px;
+}
+
+.edu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+
+.edu-school {
+    font-weight: 800;
+    color: #222;
+}
+
+.edu-major {
+    font-weight: bold;
+    color: #444;
+}
+
+.edu-detail {
+    color: #666;
+    margin-left: 8px;
+}
+
+/* ===== Section 内部分栏（单个 section 内多个子块） ===== */
+/* 用于单个 section-content 内含多个并列 .item 时的分栏 */
+.section-2col {
+    column-count: 2;
+    column-gap: 20px;
+}
+
+.section-2col .item {
+    break-inside: avoid;
+}
+
+.section-3col {
+    column-count: 3;
+    column-gap: 16px;
+}
+
+.section-3col .item {
+    break-inside: avoid;
+}
+
+/* 自定义宽度比例的三栏布局（如 1.5 : 1 : 1） */
+.section-3col-unequal {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr;
+    gap: 16px;
+}
+
+.section-3col-unequal .item {
+    break-inside: avoid;
+}
+
+/* ===== 数据型 Section 并排（跨 Section 级别） ===== */
+/* 🔒 最多 3 栏。栏间距通过 CSS 变量 --col-gap 按字数动态注入 */
+/* 每个 .section 保留完整的 section-title + section-content 结构（ATS 友好） */
+.data-sections-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: var(--col-gap, 16px);
+    align-items: start;
+}
+
+.data-sections-row .section {
+    margin-bottom: 0;
+}
+
+/* 三栏并排变体（最多 3 个数据型 section 同行） */
+.data-sections-row-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    column-gap: var(--col-gap, 16px);
+    align-items: start;
+}
+
+.data-sections-row-3 .section {
+    margin-bottom: 0;
+}
