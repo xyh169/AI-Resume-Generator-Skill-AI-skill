@@ -28,7 +28,7 @@ You are the **Stage 3 Agent** in the resume pipeline. Your job is to take the fi
 - **Allowed text change boundary**:
   - You may do minimal layout-preserving text normalization explicitly required by this skill, such as reflowing an education entry into a single line while preserving the same facts.
   - You must not add, fabricate, or semantically rewrite the candidate's content.
-- **Single-page iron rule**: If the user chooses `Single-Page Extreme`, you must execute the browser measurement and convergence flow. Do not skip it.
+- **Single-page iron rule**: If the user chooses `Single-Page Extreme` or `Single-Page Photo`, you must execute the browser measurement and convergence flow. Do not skip it.
 - **Output location**: All outputs must be written to `{OUTPUT_DIR}`, not inside the Skill folder.
 
 ## Stage 3 Ownership
@@ -50,6 +50,11 @@ You are the **Stage 3 Agent** in the resume pipeline. Your job is to take the fi
   - Read `resources/template_1page.css`
   - Then read `references/single-page-mode.md`
   - Follow the measurement/convergence process there before rendering the PDF
+- **Single-Page Photo**:
+  - Read this file
+  - Read `resources/template_1page_photo.css`
+  - Then read `references/single-page-photo-mode.md`
+  - Follow the measurement/convergence process there before rendering the PDF
 
 ## Prerequisites & Environment
 1. Ensure Python 3 is installed and available in the terminal.
@@ -62,6 +67,8 @@ You are the **Stage 3 Agent** in the resume pipeline. Your job is to take the fi
 
 **Step 1: Understand User Requirements**
 - Identify the source material (the user's unstructured text, DOCX, etc.).
+- Accepted layout names are `Single-Page Extreme`, `Single-Page Photo`, and `Multi-Page Comfortable`.
+- `Single-Page Photo` is a separate top-level layout and uses `resources/template_1page_photo.css`.
 - Identify the user's preferred layout: `Single-Page Extreme` (uses `resources/template_1page.css`) or `Multi-Page Comfortable` (uses a multi-page template). If not specified, ask the user to choose — present only these two options by name, without making any judgment about whether the content will or won't fit in one page. Content feasibility is handled automatically by the pipeline; do not speculate about it.
 - If the user selects `Multi-Page Comfortable`, identify the multi-page variant:
   - `With Photo` -> use `resources/template_multipage.css`
@@ -71,9 +78,11 @@ You are the **Stage 3 Agent** in the resume pipeline. Your job is to take the fi
 **Step 2: Generate the HTML Structure**
 You must act as the CSS/DOM architect and generate an `index.html` file in the output directory (`OUTPUT_DIR`, determined by the upstream Master Workflow — typically the directory where the user's source file resides, **outside** the Skill folder).
 1. Read the exact content of the chosen CSS file (`resources/template_1page.css`, `resources/template_multipage.css`, or `resources/template_multipage-2.css`) from this repository.
+   - For `Single-Page Photo`, use `resources/template_1page_photo.css`.
    - For `Multi-Page Comfortable + With Photo`, use `resources/template_multipage.css`.
    - For `Multi-Page Comfortable + No Photo`, use `resources/template_multipage-2.css`.
 2. Extract the user's professional information and map it strictly to the following DOM structure. DO NOT invent new classes.
+   - Exception: `Single-Page Photo` may use the dedicated wrapper classes defined in the variant skeleton below.
 3. **Dynamic Font-Size Injection**: The CSS template does NOT preset `font-size`. You must determine appropriate font sizes based on content volume and inject them into the `<style>` block.
 
 ### Font & Typography Rules
@@ -313,6 +322,62 @@ h1 (name) >> h2 (section title) > item-title (entry title) ≥ body (body text)
 </html>
 ```
 
+### Single-Page Photo Layout Skeleton
+
+When the user selects `Single-Page Photo`, use the dedicated **top-photo intro shell** below. Keep `.section`, `.section-title`, `.section-content`, and `.item` intact.
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        /* INJECT resources/template_1page_photo.css */
+        /* THEN INJECT font-size RULES AND font-family OVERRIDE */
+    </style>
+</head>
+<body>
+    <div class="a4-page">
+        <div class="single-page-photo-hero">
+            <div class="single-page-photo-intro">
+                <div class="header">
+                    <h1>姓名</h1>
+                </div>
+
+                <div class="single-page-photo-basic-info">
+                    <div class="single-page-photo-basic-line"><span class="single-page-photo-basic-label">电话</span><span class="single-page-photo-basic-value">13800000000</span></div>
+                    <div class="single-page-photo-basic-line"><span class="single-page-photo-basic-label">邮箱</span><span class="single-page-photo-basic-value">name@example.com</span></div>
+                    <div class="single-page-photo-basic-line"><span class="single-page-photo-basic-label">城市</span><span class="single-page-photo-basic-value">上海</span></div>
+                </div>
+                <!-- Personal info should stay on one horizontal line when width permits -->
+                <!-- The whole left intro block should sit bottom-left in the hero row -->
+
+                <div class="section">
+                    <div class="section-title"><h2>教育背景</h2></div>
+                    <div class="section-content">
+                        <div class="edu-item">
+                            <div class="edu-header">
+                                <div><span class="edu-school">学校</span><span class="edu-major"> | 专业</span><span class="edu-detail"> | 学位</span></div>
+                                <span class="item-date">时间</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="single-page-photo-aside">
+                <div class="sidebar-photo">
+                    <div class="photo-box"><img src="photo.jpg" alt="Profile photo"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Render all remaining sections below in the normal single-column order -->
+    </div>
+</body>
+</html>
+```
+
 ### Multi-Page Comfortable Addendum
 
 If the user selected `Multi-Page Comfortable`, you MUST read and follow:
@@ -336,6 +401,31 @@ Use the single-page reference file for:
 - target usage interpretation and stop conditions
 - single-page-only layout guardrails
 
+### Single-Page Photo Addendum
+
+If the user selected `Single-Page Photo`, you MUST read and follow:
+- `references/single-page-photo-mode.md`
+- `references/single-page-mode.md`
+
+Use the single-page photo reference file for:
+- browser verification setup
+- top intro with left-side name/basic-info/education plus right-side photo assembly
+- bottom-left alignment of the left intro block inside the hero row
+- photo-branch-specific `L1`-`L5` degradation semantics
+- single-page-photo-only guardrails
+
+Use the old single-page reference file for:
+- degradation / expansion / convergence flow
+- the old `L2` data-section column procedure
+- parameter tuning ranges
+
+`L2` guardrail for both single-page branches:
+- If the page already fits on one page, do **not** apply `L2`.
+- Do not split short data sections such as `Certifications` unless columnization is required to remove actual overflow.
+
+Header text guardrail:
+- Keep a visible `|` between `.item-title` and `.item-org` in narrative item headers; this separator belongs in the generated HTML text, not in CSS.
+
 **Step 3: Execute the Builder Script**
 Run the core python compiler script provided in this repository to render the HTML into a perfect A4 PDF.
 `$env:PYTHONIOENCODING = 'utf-8'; python scripts/builder.py {OUTPUT_DIR}/index.html -o {OUTPUT_DIR}/output_resume.pdf`
@@ -356,8 +446,13 @@ Run the core python compiler script provided in this repository to render the HT
 - **Line-Height Floor**: 🔒 Line-height minimum is 1.5. Never reduce it.
 - **Font Floor**: Never set body font-size below 9.5pt.
 - **Measurement Correctness**: Always remove `min-height`, `max-height`, and `overflow` before measuring real content height. Failure to do so will return a fake gap of 0.
+- **Photo Header Shell**: For `Single-Page Photo`, only the top intro area is photo-aware. The body below must remain the usual single-column flow unless the old single-page degradation rules temporarily apply column helpers.
+- **Reuse Old Degradation**: For `Single-Page Photo`, reuse the old `Single-Page Extreme` degradation and expansion rules instead of inventing a new sidebar balancing algorithm.
+- **No Unnecessary L2**: If the page already fits, keep data sections single-column; `L2` is only for fixing real overflow.
 - **Target Fill Rate**: Aim for 93%–98% page usage. Below 85% looks empty; above 98% risks content clipping.
 - **Iterative Convergence**: Expect 2–3 measurement rounds. Never assume a single adjustment will be correct. Always re-measure after changes.
+- **Text Encoding**: Literal labels such as `基本信息` and `照片位` must survive as valid UTF-8 text. Do not emit `?` placeholder glyphs for fixed labels.
 - **Multiplicative Caution**: `font-size` and `line-height` have multiplicative effects — a small change applies to every line and compounds quickly. Adjust incrementally (+0.3–0.5pt per round).
-- **Multi-Page Isolation**: Header + basic-info + photo-slot rules and content-aware guide-line rules are a **multi-page-only** update. Do not retrofit them into `template_1page.css` or the single-page flow unless explicitly requested.
+- **Single-Page Branch Isolation**: `template_1page.css` + `references/single-page-mode.md` remain the old single-page branch. `template_1page_photo.css` + `references/single-page-photo-mode.md` are a separate single-page-with-photo branch. Do not merge or overwrite either branch.
+- **Multi-Page Isolation**: Content-aware guide-line rules remain a **multi-page-only** update. Do not retrofit them into either single-page branch unless explicitly requested.
 - **Multi-Page Variant Isolation**: `template_multipage.css` is the `With Photo` variant; `template_multipage-2.css` is the `No Photo` variant. Do not mix their DOM expectations.

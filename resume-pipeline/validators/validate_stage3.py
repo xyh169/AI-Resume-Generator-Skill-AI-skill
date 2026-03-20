@@ -13,6 +13,7 @@ FORBIDDEN_MARKERS = [
     "TODO",
     "系统提示词",
 ]
+SINGLE_PAGE_LAYOUTS = {"Single-Page Extreme", "Single-Page Photo"}
 
 
 def sha256_file(path: Path) -> str:
@@ -135,7 +136,7 @@ def main() -> int:
 
     page_count = count_pdf_pages(pdf_path)
     single_page_ok = True
-    if layout_mode == "Single-Page Extreme":
+    if layout_mode in SINGLE_PAGE_LAYOUTS:
         single_page_ok = page_count == 1
         add_check(checks, "single_page_pdf_has_one_page", single_page_ok, str(page_count))
         if not single_page_ok:

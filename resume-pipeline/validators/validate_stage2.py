@@ -44,6 +44,7 @@ FORBIDDEN_MARKERS = [
 ]
 
 SECTION_RE = re.compile(r"^##\s+(.+?)(?:\s+<!--\s*type:\s*(narrative|data)\s*-->)?\s*$")
+SINGLE_PAGE_LAYOUTS = {"Single-Page Extreme", "Single-Page Photo"}
 
 
 def sha256_file(path: Path) -> str:
@@ -73,7 +74,7 @@ def main() -> int:
     parser.add_argument(
         "--layout-mode",
         required=True,
-        choices=["Single-Page Extreme", "Multi-Page Comfortable"],
+        choices=["Single-Page Extreme", "Single-Page Photo", "Multi-Page Comfortable"],
         help="Layout mode selected for the workflow",
     )
     parser.add_argument(
@@ -251,7 +252,7 @@ def main() -> int:
 
     if args.layout_mode == "Multi-Page Comfortable" and args.multi_page_variant == "not_required":
         warnings.append("Multi-page variant not specified; Stage 3 may still need to ask for With Photo or No Photo")
-    if args.layout_mode == "Single-Page Extreme" and args.multi_page_variant != "not_required":
+    if args.layout_mode in SINGLE_PAGE_LAYOUTS and args.multi_page_variant != "not_required":
         warnings.append("Single-page runs should not carry a multi-page variant")
 
     manifest_written = False

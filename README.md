@@ -14,8 +14,8 @@ This workflow acts as a Master Workflow scheduler, connecting the following thre
 | Stage | Core Module | Advanced Features & Mechanisms |
 |------|---------|--------------------|
 | **1** | `1-template-to-md` | **Universal Format Support**: Fully supports parsing `PDF`, `DOCX`, `TXT`, `HTML`, `RTF`, `TEX`, and can even directly ingest **colloquial plain text / chat records / voice transcripts**.<br>Equipped with **5 Error Retries** and a **Multi-Strategy Fallback System** (e.g., PDF conversion prioritizes `pymupdf4llm`, falls back to native `PyMuPDF` on failure, and uses `pdfplumber` as a last resort; HTML and DOCX also have corresponding automatic fallback routing). Supports automatic installation of missing packages and binary tools. |
-| **2** | `2-transcriptor` | **Automated Denoising & Professional Restructuring Engine**. Based on the user-provided target role/company, it automatically retrieves the latest Job Description (JD) from the web for deep matching. Leverages the **STAR method** to eliminate fluff, utilizes standardized professional action verbs (e.g., "Spearheaded", "Directed"), and strictly manages information boundaries (e.g., isolating honors and awards into separate sections). |
-| **3** | `3-pdf-generator` | **Single/Multi-Page PDF Dynamic Typesetting Engine**. Supports `Single-Page Extreme` plus `Multi-Page Comfortable` with two variants: `With Photo` and `No Photo`. Single-page mode includes browser-based height detection and a **Dynamic Adaptive Layout Algorithm** (adjusting font size, margins, and column layouts) to hit the `93%-98%` page utilization target while **ensuring** a minimum line-height of `1.5`; multi-page mode uses shared cross-page rules without the single-page convergence loop. |
+| **2** | `2-transcriptor` | **Automated Denoising & Professional Restructuring Engine**. Based on the user-provided target role/company, it automatically retrieves the latest Job Description (JD) from the web for deep matching. Leverages the **STAR method** to eliminate fluff, utilizes standardized professional action verbs (e.g., "Spearheaded", "Directed"), and strictly manages information boundaries (e.g., isolating honors and awards into separate sections). For narrative entries, it preserves a stable Markdown triplet header format such as `**Project Name** | Role | Date`, so the downstream renderer can keep visible separators consistently. |
+| **3** | `3-pdf-generator` | **Single/Multi-Page PDF Dynamic Typesetting Engine**. Supports `Single-Page Extreme`, `Single-Page Photo`, plus `Multi-Page Comfortable` with two variants: `With Photo` and `No Photo`. The two single-page modes are now treated as **separate branches with their own L1-L5 degradation semantics**: `Single-Page Photo` keeps the top photo shell intact, only columnizes data sections on real overflow, and no longer uses columns just to chase denser fill. Multi-page mode uses shared cross-page rules without the single-page convergence loop. |
 
 ## 📦 Directory Structure
 
@@ -32,7 +32,17 @@ This workflow acts as a Master Workflow scheduler, connecting the following thre
     └── validators/              ← Minimal stage validators & handoff checks
 ```
 
-## ✨ What's New in v2.2.0
+## ✨ What's New in v2.3.0
+
+This release updates the **`Single-Page Photo` template**.
+
+*   **Photo-Header Single-Page Layout Refresh**: Reworked the template into a dedicated top-photo shell: left side for name, horizontal basic information, and education; right side for a fixed 1-inch photo slot; then the page returns to the normal single-column resume body.
+*   **Header Alignment Tuning**: Adjusted the photo hero so the left intro block sits closer to the lower edge of the photo row, reducing the visual break between the education block and the body sections below.
+---
+
+## 🗂 Historical Updates Archive
+
+### v2.2.0
 
 This release combines **multi-page layout refinement** with **workflow execution hardening**. 
 
@@ -42,10 +52,7 @@ This release combines **multi-page layout refinement** with **workflow execution
 *   **Multi-Page Dual Variants (With Photo / No Photo)**: Expanded multi-page mode into two explicit variants. `With Photo` keeps the original `Basic Information + right-side photo/photo-slot` layout, while `No Photo` uses a cleaner header-first structure without reserving image space. Both variants share the same cross-page behavior and content-aware blue guide line rules, making it easier to support both domestic photo-style resumes and cleaner no-photo formats without overhauling the rest of the template.
 *   **Content-Aware Blue Guide Line Rendering**: Upgraded the multi-page left-side blue guide line logic so it now follows **real content blocks** instead of stretching across empty tail space. The guide line remains visually continuous when more content exists below, but no longer drops awkwardly into blank page-bottom areas.
 *   **Single-Page Content Gate Recalibration**: Relaxed the `2-transcriptor` single-page precheck thresholds for bullet count, effective character count, and estimated render lines, so dense-but-still-readable resumes can pass without being over-compressed at the content stage. 
-
----
-
-## 🗂 Historical Updates Archive
+*   **Single-Page Handoff Clarification**: Tightened the Stage 2 → Stage 3 contract so narrative entry headers preserve visible pipe separators (for example `**Project Name** | Role | Date`), and clarified that `Single-Page Extreme` and `Single-Page Photo` are distinct convergence branches rather than one shared fallback path.
 
 ### v2.1.0
 
@@ -76,7 +83,7 @@ Compared to the previous v1.x versions (which primarily focused on PDF generatio
 
 ## 🧭 Layout Selection Flow
 
-1. Choose `Single-Page Extreme` or `Multi-Page Comfortable`.
+1. Choose `Single-Page Extreme`, `Single-Page Photo`, or `Multi-Page Comfortable`.
 2. If you choose `Multi-Page Comfortable`, then choose `With Photo` or `No Photo`.
 3. If you do not provide a JD / company + role / target direction, the workflow will ask once before falling back to a generic version.
 
@@ -86,7 +93,7 @@ Compared to the previous v1.x versions (which primarily focused on PDF generatio
 
 In any IDE or application equipped with Agent capabilities (e.g., Cursor, Claude Desktop, Antigravity), issue the following prompt:
 
-> *"Please read `resume-pipeline/SKILL.md` and use the raw materials (attachments, text) I provided to automatically generate a resume. The target position is [Company + Role / Specific JD Text]. Please render it as `Single-Page Extreme` or `Multi-Page Comfortable`. If using multi-page, choose `With Photo` or `No Photo`."*
+> *"Please read `resume-pipeline/SKILL.md` and use the raw materials (attachments, text) I provided to automatically generate a resume. The target position is [Company + Role / Specific JD Text]. Please render it as `Single-Page Extreme`, `Single-Page Photo`, or `Multi-Page Comfortable`. If using multi-page, choose `With Photo` or `No Photo`."*
 
 If you provide a target company/role, the AI will automatically retrieve the latest JD, restructure colloquial descriptions, and transparently fix layout issues when needed. If you do **not** provide a target direction, the workflow will first ask whether you want to specify one or proceed with a generic version.
 

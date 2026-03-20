@@ -48,6 +48,7 @@ description: 严格执行 Stage 2 文本重构。用于把原始简历材料或 
 - section 标题尽量使用 ATS 标准标题
 - 除教育背景外，相关 section 已补齐 `<!-- type: narrative -->` 或 `<!-- type: data -->`
 - 内容已完成文本层单页预检（若用户要求单页）
+- 叙事型条目头行保持稳定 triplet 结构：`**标题** | 角色/组织 | 时间`
 - 文件内不得出现这类运行时备注：
   - `content_volume: ...`
   - `给下游排版器：...`
@@ -137,7 +138,7 @@ description: 严格执行 Stage 2 文本重构。用于把原始简历材料或 
 
 > 教育背景不需要标注，下游有专用布局。
 
-下游 `3-pdf-generator` 会根据此标注决定：数据型 section 相邻时并排显示（两栏或三栏），描述型 section 永远单栏。
+下游 `3-pdf-generator` 会根据此标注决定：描述型 section 永远单栏；数据型 section 只有在单页 branch 的 `L2` 为了解决真实超页时才允许并排显示。
 
 ---
 
@@ -181,7 +182,9 @@ description: 严格执行 Stage 2 文本重构。用于把原始简历材料或 
 
 ### Step 3.5: 单页排版可行性预检（仅当用户要求单页模式时执行）
 
-> 🔒 **触发条件**：当且仅当用户明确要求使用 `Single-Page Extreme`（单页模式）时，才执行本步骤。若用户选择多页模式或未指定，跳过此步骤直接进入 Step 4。
+> 🔒 **触发条件**：当且仅当用户明确要求使用 `Single-Page Extreme` 或 `Single-Page Photo`（任一单页模式）时，才执行本步骤。若用户选择多页模式或未指定，跳过此步骤直接进入 Step 4。
+> For `Single-Page Photo`, keep the text density slightly tighter than the old single-page mode because the fixed photo sidebar reduces usable text width.
+> Stage 3 owns the branch-specific `L1-L5` convergence rules; Stage 2 only prepares text density and stable Markdown structure.
 
 #### 快速执行原则
 

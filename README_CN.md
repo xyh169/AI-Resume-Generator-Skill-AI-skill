@@ -1,103 +1,106 @@
-# Resume Pipeline — 全自动简历生成工作流
+# Resume Pipeline - 全自动简历生成工作流
 
 <p align="center">
-  <b>🌏 Language / 语言</b><br>
+  <b>Language / 语言</b><br>
   <a href="README.md">English</a> | 简体中文
 </p>
 
-> 基于 Agentic AI 的一键式简历生成全流程编排。无论输入的是 Word、PDF、HTML、纯文本，甚至是极度口语化的**聊天记录语音转写**，本工作流都能将原始资料转化为高度专业、排版精美的 Blue-Purple 旗帜风格 A4 PDF 简历。
+> 一个基于 Agent 的端到端简历流水线。无论输入是 Word、PDF、HTML、纯文本，还是口语化的聊天记录与语音转写，都可以被整理为结构化内容，并渲染成专业的 A4 PDF 简历。
 
-## 🎯 核心架构与功能一览
+## 核心架构与能力概览
 
-本工作流作为一个总控调度器 (Master Workflow)，将以下三个深度强化的独立子技能 (Skills) 按固定顺序串联执行，提供了从格式清洗到排版渲染的**端到端完整**解决方案。
+整个工作流由三个阶段按固定顺序组成，覆盖从原始资料解析到最终 PDF 渲染的完整流程。
 
-| 阶段 | 核心模块 | 进阶功能与机制特性 |
-|------|---------|--------------------|
-| **1** | `1-template-to-md` | **全格式兼容支持**：支持解析 `PDF`、`DOCX`、`TXT`、`HTML`、`RTF`、`TEX` 等全系格式，也能直接接收**口语化纯文本 / 聊天记录 / 语音转写**。<br>具备**5次错误重试**和**多策略降级体系**（例如 PDF 转换优先使用 `pymupdf4llm`，失败则降级原生 `PyMuPDF`，兜底 `pdfplumber`；处理 HTML 与 DOCX 也有对应的自动降级路由）。支持在缺少依赖时自动安装包与二进制工具。 |
-| **2** | `2-transcriptor` | **自动去噪与专业化重构引擎**。根据用户提供的目标岗位/公司，自动全网检索最新 Job Description（JD），执行深度匹配。采用 STAR 原则改写口语化表述，启用标准化的求职动作词（如”主导研发”），控制信息范围（如剥离非核心荣誉记录）。 |
-| **3** | `3-pdf-generator` | **单/多页 PDF 动态排版引擎**。支持 `Single-Page Extreme`，以及带两种变体的 `Multi-Page Comfortable`：`With Photo` 与 `No Photo`。单页模式内置浏览器检测与**动态自适应扩缩容算法**（调整字号、分栏布局），精准命中 `93%-98%` 的页面利用率目标，并**始终确保**行高不低于 `1.5`；多页模式则沿用共享跨页规则，不执行单页收敛循环。 |
+| 阶段 | 核心模块 | 主要能力 |
+|------|---------|---------|
+| **1** | `1-template-to-md` | 负责格式转换与原始内容提取。支持 `PDF`、`DOCX`、`TXT`、`HTML`、`RTF`、`TEX` 等格式，也能接收聊天记录或语音转写。内置重试与降级策略。 |
+| **2** | `2-transcriptor` | 负责内容重构与专业化表达。根据目标岗位或 JD 做匹配，按 ATS 兼容结构输出 `refined_resume.md`。叙事型条目头部会保持稳定格式，例如 `**项目名** | 角色 | 时间`。 |
+| **3** | `3-pdf-generator` | 负责 HTML/CSS 排版与 PDF 导出。支持 `Single-Page Extreme`、`Single-Page Photo`，以及 `Multi-Page Comfortable` 的 `With Photo` / `No Photo` 两种变体。单页模式使用浏览器测量与收敛，多页模式使用共享跨页规则。 |
 
-## 📦 目录结构
+## 目录结构
 
 ```text
-├── README.md                ← 英文版说明文档
-├── README_CN.md             ← 本中文说明文档
-└── resume-pipeline/         ← 核心流水线主目录
-    ├── SKILL.md                 ← 总控编排入口文件
-    ├── REFACTOR_PLAN.md         ← 本轮改造计划与进度记录
-    ├── 1-template-to-md/        ← 阶段一：高容错流式格式洗稿转换
-    ├── 2-transcriptor/          ← 阶段二：JD 匹配型内容专业化重写
-    ├── 3-pdf-generator/         ← 阶段三：自适应 A4 PDF 渲染导出
-    │   └── references/          ← 单页 / 多页共享规则 + 多页变体规则引用文件
-    └── validators/              ← 阶段校验器与 handoff 检查
+├── README.md                -> 英文说明
+├── README_CN.md             -> 中文说明
+└── resume-pipeline/         -> 核心流水线目录
+    ├── SKILL.md             -> 总控入口
+    ├── REFACTOR_PLAN.md     -> 重构计划
+    ├── 1-template-to-md/    -> 阶段一：格式转换
+    ├── 2-transcriptor/      -> 阶段二：内容重构
+    ├── 3-pdf-generator/     -> 阶段三：排版渲染与 PDF 导出
+    ├── references/          -> 各分支 reference
+    └── validators/          -> 阶段校验脚本
 ```
 
-## ✨ v2.2.0 更新日志 (What's New)
+## v2.3.0 更新日志
 
-*   **全链路 Skill 合同化收紧**：将总控入口与三个阶段 Skill 统一改造成低自由度执行协议，补齐显式 `HARD CONTRACT`、阶段职责、标准产物链、通过条件与失败处理，减少弱模型串阶段、跳步骤和自由发挥的概率。
-*   **最小校验层 + Handoff Manifest**：新增 Stage 2 / Stage 3 校验器，并在 Stage 2 成功后生成 `resume_pipeline_handoff.json`。现在可以校验关键产物是否存在、拦截过程性标记泄漏、检查 Stage 3 是否改动 `refined_resume.md`，并确认单页 PDF 确实只有 1 页。
-*   **Stage 3 单页 / 多页变体规则拆分引用**：将 `3-pdf-generator` 的主 `SKILL.md` 调整为路由与合同入口，把单页规则拆到 `references/single-page-mode.md`，多页共享规则拆到 `references/multi-page-mode.md`，并补充多页变体规则引用文件，让主文件更短、分支判断更清楚。
-*   **多页版双变体（带照片 / 不带照片）**：将多页模式扩展为两个显式变体。`With Photo` 保留原有的 `基本信息 + 右侧照片/照片位` 布局，`No Photo` 则使用更接近单页版的 Header-first 无照片结构，不再预留图片空间。两种变体共享相同的跨页行为与内容感知型蓝色引导竖线规则，因此既能支持国内常见带照片简历，也能稳定支持更简洁的不带照片版本，而无需重构整套模板。
-*   **内容感知型蓝色引导竖线**：重构了多页版左侧蓝色竖线的绘制逻辑。竖线现在会跟随**真实内容块**延展，而不再机械地贯穿整块容器高度。这样既能保证正文段落之间的视觉连续性，也能避免竖线拖到页底空白区造成突兀感。
-*   **单页内容门槛重校准**：放宽了 `2-transcriptor` 中单页预检对 bullet 数、有效字符数和估算渲染行数的阈值，让“内容偏满但仍具可读性”的简历不再在文案阶段被过度压缩；同时收紧了文本层自动扩写的触发条件。
+这次版本主要更新了带照片的单页模板。
 
----
+- **带照片的单页模板更新**：`Single-Page Photo` 调整为专用的顶部照片壳层结构。左侧放姓名、横排基本信息与教育经历，右侧放固定一寸照片位，下面再回到正常的单栏正文流。
+- **头部衔接感优化**：补充了照片头部左栏的对齐规则，让“姓名 + 基本信息 + 教育经历”更贴近照片行下沿，减轻与下方正文模块之间的分裂感。
 
-## 🗂 历史更新存档
-
-### v2.1.0 更新日志 
-
-本次更新聚焦于排版引擎的逻辑优化与 ATS（自动简历筛选系统）兼容性强化：
-
-*   **ATS 兼容标准化 Section 标题**：在 `2-transcriptor` 阶段新增完整的中英文 ATS 标准标题映射表与选择规则，确保输出的简历模块标题（如"教育背景"、"项目经历"、"专业技能"等）能被主流自动筛选系统与 AI 评分系统 100% 正确解析，杜绝因非标标题导致的信息丢失或评分降权。
-*   **排版逻辑顺序优化**：重构了 `3-pdf-generator` 的降级/扩展策略执行顺序与闭环验证流程。引入"降级-回填闭环"机制（L1→L2→L3→L4 逐级降级后若 usage 不足则自动触发 E1-E4 回填），确保页面利用率收敛至 93%–98% 黄金区间后才出 PDF，避免之前可能出现的过度压缩或留白问题。
-*   **用户参数引导与透明选择**：优化了工作流入口的用户交互设计——顶层仍仅向用户呈示"单页极限版"与"多页舒适版"两个布局选项，而在选择多页版后，再进一步确认 `With Photo / No Photo` 变体。系统仍自动判断内容可行性，不再让用户猜测内容量是否适配，同时也完善了循环终止后的用户沟通话术。
-*   **Section 内容分类标注体系**：新增 `<!-- type: narrative -->` 与 `<!-- type: data -->` 标注规范，使 Transcriptor 的输出能被下游 PDF 引擎精准识别，实现"描述型永不分栏、数据型按需并排"的智能分栏决策。
 
 ---
 
-### v2.0.0 重大架构升级存档
+## 历史更新存档
 
-相比于仅仅提供 PDF 渲染和单页测算能力的 v1.x 旧版本，v2.0.0 进行了架构级的全面重构：
+### v2.2.0
 
-*   **从单点工具到三大 Skill 全链条协同**：由原来的单一生成脚升级为涵盖 **格式转化 (template-to-md) → 内容转录与降噪 (transcriptor) → 动态排版渲染 (pdf-generator)** 的完整流水线。
-*   **打通全格式解析壁垒**：输入源不再只局限于纯文本，现已全面支持智能解析并提取 `PDF`、`DOCX`、`TXT`、`HTML`、`RTF`、`TEX` 等多类型文档，甚至能直接吞吐极度口语化的聊天记录。
-*   **原生支持 MCP 协议**：新增的格式转化与内容转录模块现已完整搭载 Model Context Protocol (MCP) 服务端能力。允许被直接作为工具挂载到 Cursor、Claude Desktop 等原生 AI 终端中无缝调用。
+- **全链路 Skill 合同化收紧**：总控与三个阶段 Skill 增加了显式 `HARD CONTRACT`、阶段职责、标准产物、通过条件与失败处理，减少串阶段和自由发挥。
+- **最小校验层 + Handoff Manifest**：新增 Stage 2 / Stage 3 校验器，并生成 `resume_pipeline_handoff.json`，用于检查关键产物、过程标记泄漏以及单页 PDF 是否真的只有一页。
+- **Stage 3 reference 拆分**：将单页、多页与多页变体规则拆到独立 reference 中，主 `SKILL.md` 主要承担路由与合同职责。
+- **多页版双变体**：`Multi-Page Comfortable` 明确拆为 `With Photo` 与 `No Photo` 两种变体。
+- **内容感知型蓝色引导竖线**：优化多页版竖线逻辑，使其跟随真实内容块而不是机械拉满。
+- **单页内容门槛重校准**：调整 Stage 2 的单页预检阈值，减少对可读内容的过度压缩。
+- **单页 handoff 说明补充**：进一步明确 Stage 2 到 Stage 3 的 Markdown 交接要求。
 
----
+### v2.1.0
 
-### v1.1.0 更新存档
-*   **自适应单页排版引擎**：引入完整的浏览器嗅探探针，并提供基于内容的五级容错缩放策略（字号微调 / 多列表格 / Padding压缩等）。
-*   **动态字体大小注入**：不再依赖静态 CSS 中的死板字号，由算法通过当前内容体量自动演算最佳大小，打底层级。
-*   **块级分栏排版**：新增 `.section-2col` / `.section-3col` 等栏位配置支持类，可智能容纳同行内多个平级项目。
-*   **视觉安全阀机制**：底层通过硬编码确保单页极限状态下，行距依然无法被压缩到 1.5 以下。
+- **ATS 兼容标准标题**：增加中英文 ATS 标准 section 标题映射表。
+- **排版逻辑顺序优化**：完善单页模式的降级、扩展与闭环验证流程。
+- **用户参数引导更清晰**：明确顶层版式选择与多页变体选择。
+- **Section 内容类型标注**：加入 `<!-- type: narrative -->` 与 `<!-- type: data -->` 约定，供 Stage 3 识别。
 
-## 🧭 版式选择流程
+### v2.0.0
 
-1. 先选择 `Single-Page Extreme` 或 `Multi-Page Comfortable`。
+- **从单脚本升级为三阶段流水线**：形成 `template-to-md -> transcriptor -> pdf-generator` 的完整协作链路。
+- **扩展输入格式**：支持 PDF、DOCX、TXT、HTML、RTF、TEX 以及非结构化聊天文本。
+- **原生支持 MCP**：可作为 MCP server 接入支持相关协议的 AI IDE 或 Agent 环境。
+
+### v1.1.0
+
+- **自适应单页布局引擎**：加入浏览器测量与单页收敛策略。
+- **动态字号注入**：根据内容体量自动确定字号层级。
+- **Section 级分栏支持**：引入 `.section-2col` / `.section-3col` 等布局类。
+- **行高安全下限**：保证行高不低于 `1.5`。
+
+## 版式选择流程
+
+1. 先选择 `Single-Page Extreme`、`Single-Page Photo` 或 `Multi-Page Comfortable`。
 2. 如果选择 `Multi-Page Comfortable`，再选择 `With Photo` 或 `No Photo`。
 3. 如果没有提供 JD / 公司+岗位 / 求职方向，工作流会先追问一次，再决定是否走通用版。
 
-## 🚀 推荐集成与使用方式
+## 推荐使用方式
 
-### 方案 A：AI Agent 全自动对话模式（推荐 ✨）
+### 方案 A：AI Agent 全自动模式
 
-在任意搭载 Agent 工具（如 Cursor, Claude Desktop, Antigravity）的 IDE 或应用中，对其输入如下指令：
+在支持 Agent 的 IDE 或应用中，可以直接使用类似下面的提示词：
 
-> *"请阅读 `resume-pipeline/SKILL.md`，使用我提供的原始资料（附件、语料），帮我全自动生成一份简历。目标岗位是 [公司名 + 岗位名 / 具体的 JD 文本]，请按 `Single-Page Extreme` 或 `Multi-Page Comfortable` 渲染；如果是多页版，再选择 `With Photo` 或 `No Photo`。"*
+> 请阅读 `resume-pipeline/SKILL.md`，使用我提供的原始资料（附件、文本）帮我生成一份简历。目标岗位是 [公司名 + 岗位名 / 具体 JD]，请按 `Single-Page Extreme`、`Single-Page Photo` 或 `Multi-Page Comfortable` 渲染；如果是多页版，再选择 `With Photo` 或 `No Photo`。
 
-如果你提供了目标公司/岗位，AI 会自动检索最新 JD 并完成定制化重写；如果你没有提供方向，工作流会先询问你是否需要指定方向，只有你明确表示走通用版时才会跳过岗位定制。对于单页版，AI 会在遇到页面排版溢出或留白时，自动通过 Python 服务器测量并修复排版。
+如果提供了目标岗位信息，工作流会做岗位匹配与内容定制；如果没有提供，工作流会先询问是否需要指定方向。单页模式下，Stage 3 会自动执行测量与收敛，而不是只输出一个“看起来像单页”的 PDF。
 
-### 方案 B：作为标准化的 MCP Server 接入 🔌
+### 方案 B：作为 MCP 服务接入
 
-我们的底层能力支持 Model Context Protocol (MCP)。你可以在你的工具链中直接将它们挂载为独立服务（内置错误重试与降级体系）。
-请确保你已安装 `uv` 依赖管理器，以配置 Cursor 为例：
-- `convert_file_to_md` 技能：`uvx --from "/你的绝对路径/1-template-to-md/mcp-server" mcp-template-to-md`
-- `transcriptor-agent` 重写技能：`uvx --from "/你的绝对路径/2-transcriptor/mcp-server" mcp-transcriptor`
+如果你的环境支持 MCP，可以将底层能力直接挂载为独立服务。以 Cursor 为例：
 
-*(更多底层调参、执行规则与系统提示词机制，请仔细阅读对应子目录中的 `SKILL.md` 文件)*
+- `convert_file_to_md`：`uvx --from "/你的绝对路径/1-template-to-md/mcp-server" mcp-template-to-md`
+- `transcriptor-agent`：`uvx --from "/你的绝对路径/2-transcriptor/mcp-server" mcp-transcriptor`
+
+更多执行协议和系统提示词配置，请分别阅读各子目录中的 `SKILL.md`。
 
 ---
 
-## 📄 许可证
+## 许可证
+
 GPL-3.0

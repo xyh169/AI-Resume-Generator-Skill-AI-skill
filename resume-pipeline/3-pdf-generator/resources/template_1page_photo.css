@@ -1,0 +1,344 @@
+/* Blue-Purple single-page with photo header */
+/* Font sizes are injected dynamically by Stage 3. */
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    margin: 0;
+    background: #e0e4eb;
+    color: #333;
+    line-height: 1.5;
+}
+
+@page {
+    size: A4;
+    margin: 0;
+}
+
+.a4-page {
+    width: 210mm;
+    min-height: 297mm;
+    max-height: 297mm;
+    overflow: hidden;
+    padding: 12mm 15mm 12mm 15mm;
+    box-sizing: border-box;
+    background: #fff;
+    margin: 20px auto;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+}
+
+@media print {
+    body {
+        background: #fff;
+    }
+
+    .a4-page {
+        box-shadow: none;
+        margin: 0;
+        padding: 12mm 15mm 12mm 15mm;
+        min-height: auto;
+        max-height: 297mm;
+        overflow: hidden;
+    }
+
+    .item {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    .section-title,
+    .item-header {
+        page-break-after: avoid !important;
+        break-after: avoid !important;
+    }
+}
+
+/* ===== Top Intro With Photo ===== */
+.single-page-photo-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 25mm;
+    column-gap: 10mm;
+    align-items: end;
+    margin-bottom: 8px;
+}
+
+.single-page-photo-intro {
+    min-width: 0;
+    min-height: 35mm;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.single-page-photo-aside {
+    width: 25mm;
+    justify-self: end;
+}
+
+.sidebar-photo {
+    width: 25mm;
+}
+
+.photo-box,
+.photo-slot {
+    width: 25mm;
+    height: 35mm;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.photo-box {
+    overflow: hidden;
+    border: 1px solid rgba(59, 80, 217, 0.25);
+    background: #f5f7ff;
+}
+
+.photo-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.photo-slot {
+    border: 1.5px dashed rgba(59, 80, 217, 0.65);
+    color: #3B50D9;
+    font-weight: bold;
+    background: linear-gradient(180deg, rgba(59, 80, 217, 0.06), rgba(59, 80, 217, 0.12));
+}
+
+.header {
+    text-align: left;
+    margin-bottom: 6px;
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.header h1 {
+    color: #3B50D9;
+    margin: 0;
+    letter-spacing: 2px;
+}
+
+.header p {
+    margin: 2px 0 0 0;
+    color: #444;
+}
+
+.single-page-photo-basic-info {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 12px;
+    row-gap: 3px;
+    margin-bottom: 4px;
+}
+
+.single-page-photo-basic-line {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+}
+
+.single-page-photo-basic-label {
+    min-width: 2.8em;
+    color: #3B50D9;
+    font-weight: bold;
+    line-height: 1.15;
+}
+
+.single-page-photo-basic-value {
+    color: #444;
+}
+
+.single-page-photo-intro .section {
+    margin-bottom: 0;
+}
+
+.single-page-photo-intro .section-title {
+    margin-top: 4px;
+}
+
+/* ===== Section Title ===== */
+.section-title {
+    display: inline-flex;
+    background: linear-gradient(135deg, #3B50D9 0%, #5268E8 100%);
+    clip-path: polygon(0 0, 100% 0, calc(100% - 15px) 100%, 0 100%);
+    position: relative;
+    padding: 3px 18px 3px 8px;
+    margin: 5px 0 4px 0;
+}
+
+.section-title::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background-color: #2a3cb0;
+}
+
+.section-title h2 {
+    color: #fff;
+    margin: 0;
+    letter-spacing: 1px;
+    line-height: 1.2;
+}
+
+/* ===== Section Content ===== */
+.section-content {
+    border-left: 2px solid #3B50D9;
+    padding-left: 8px;
+    margin-left: 2px;
+    margin-bottom: 4px;
+}
+
+/* ===== List ===== */
+ul {
+    padding-left: 1.1em;
+    margin: 2px 0;
+}
+
+li {
+    list-style: none;
+    position: relative;
+    margin-bottom: 2px;
+    text-align: justify;
+}
+
+li::before {
+    content: "";
+    position: absolute;
+    left: -0.95em;
+    top: 0.68em;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #3B50D9;
+}
+
+/* ===== Item ===== */
+.item {
+    margin-bottom: 5px;
+}
+
+.item:last-child {
+    margin-bottom: 0;
+}
+
+.item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 2px;
+}
+
+.item-title {
+    color: #3B50D9;
+    font-weight: bold;
+}
+
+.item-org {
+    color: #444;
+    font-weight: bold;
+    margin-left: 6px;
+}
+
+.item-date {
+    color: #3B50D9;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.item-desc {
+    font-style: italic;
+    color: #555;
+    margin-bottom: 2px;
+}
+
+/* ===== Highlight ===== */
+.k {
+    color: #111;
+    font-weight: 800;
+    border-bottom: 1px solid rgba(59, 80, 217, 0.3);
+}
+
+/* ===== Education ===== */
+.edu-item {
+    margin-bottom: 3px;
+}
+
+.edu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.edu-school {
+    font-weight: 800;
+    color: #222;
+}
+
+.edu-major {
+    font-weight: bold;
+    color: #444;
+}
+
+.edu-detail {
+    color: #666;
+    margin-left: 8px;
+}
+
+/* ===== Old Single-Page Degradation Support ===== */
+.section-2col {
+    column-count: 2;
+    column-gap: 20px;
+}
+
+.section-2col .item {
+    break-inside: avoid;
+}
+
+.section-3col {
+    column-count: 3;
+    column-gap: 16px;
+}
+
+.section-3col .item {
+    break-inside: avoid;
+}
+
+.section-3col-unequal {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr;
+    gap: 16px;
+}
+
+.section-3col-unequal .item {
+    break-inside: avoid;
+}
+
+.data-sections-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: var(--col-gap, 16px);
+    align-items: start;
+}
+
+.data-sections-row .section {
+    margin-bottom: 0;
+}
+
+.data-sections-row-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    column-gap: var(--col-gap, 16px);
+    align-items: start;
+}
+
+.data-sections-row-3 .section {
+    margin-bottom: 0;
+}

@@ -317,6 +317,7 @@ def run_pipeline(
 #  RESOURCES — 暴露 CSS 模板、排版参考文档和流水线规范
 # ===================================================================
 
+@mcp.resource("resume://templates/css/1page")
 @mcp.resource("resume://templates/css/single-page")
 def get_css_single_page() -> str:
     """单页极限模式的 CSS 模板 (template_1page.css)"""
@@ -324,6 +325,15 @@ def get_css_single_page() -> str:
     return css_path.read_text(encoding="utf-8") if css_path.exists() else "[资源缺失]"
 
 
+@mcp.resource("resume://templates/css/1page_photo")
+@mcp.resource("resume://templates/css/single-page-photo")
+def get_css_single_page_photo() -> str:
+    """Single-page photo CSS template (template_1page_photo.css)"""
+    css_path = _RESOURCES_DIR / "template_1page_photo.css"
+    return css_path.read_text(encoding="utf-8") if css_path.exists() else "[missing resource]"
+
+
+@mcp.resource("resume://templates/css/multipage")
 @mcp.resource("resume://templates/css/multipage-with-photo")
 def get_css_multipage_photo() -> str:
     """多页带照片模式的 CSS 模板 (template_multipage.css)"""
@@ -331,6 +341,7 @@ def get_css_multipage_photo() -> str:
     return css_path.read_text(encoding="utf-8") if css_path.exists() else "[资源缺失]"
 
 
+@mcp.resource("resume://templates/css/multipage-2")
 @mcp.resource("resume://templates/css/multipage-no-photo")
 def get_css_multipage_no_photo() -> str:
     """多页无照片模式的 CSS 模板 (template_multipage-2.css)"""
@@ -343,6 +354,13 @@ def get_ref_single_page() -> str:
     """单页收敛排版参考文档"""
     ref_path = _REFERENCES_DIR / "single-page-mode.md"
     return ref_path.read_text(encoding="utf-8") if ref_path.exists() else "[资源缺失]"
+
+
+@mcp.resource("resume://references/single-page-photo-mode")
+def get_ref_single_page_photo() -> str:
+    """Single-page photo layout reference"""
+    ref_path = _REFERENCES_DIR / "single-page-photo-mode.md"
+    return ref_path.read_text(encoding="utf-8") if ref_path.exists() else "[missing resource]"
 
 
 @mcp.resource("resume://references/multi-page-mode")
@@ -448,18 +466,40 @@ def pipeline_briefing(
         layout_mode:        版式模式
         multi_page_variant: 多页变体（仅多页模式需要）
     """
-    css_map = {
-        ("Single-Page Extreme", "not_required"): "template_1page.css",
-        ("Multi-Page Comfortable", "With Photo"): "template_multipage.css",
-        ("Multi-Page Comfortable", "No Photo"): "template_multipage-2.css",
+    asset_map = {
+        ("Single-Page Extreme", "not_required"): {
+            "css_file": "template_1page.css",
+            "css_resource": "resume://templates/css/single-page",
+            "ref_file": "single-page-mode.md",
+            "ref_resource": "resume://references/single-page-mode",
+        },
+        ("Single-Page Photo", "not_required"): {
+            "css_file": "template_1page_photo.css",
+            "css_resource": "resume://templates/css/single-page-photo",
+            "ref_file": "single-page-photo-mode.md",
+            "ref_resource": "resume://references/single-page-photo-mode",
+        },
+        ("Multi-Page Comfortable", "With Photo"): {
+            "css_file": "template_multipage.css",
+            "css_resource": "resume://templates/css/multipage-with-photo",
+            "ref_file": "multi-page-mode.md",
+            "ref_resource": "resume://references/multi-page-mode + resume://references/multi-page-with-photo",
+        },
+        ("Multi-Page Comfortable", "No Photo"): {
+            "css_file": "template_multipage-2.css",
+            "css_resource": "resume://templates/css/multipage-no-photo",
+            "ref_file": "multi-page-mode.md",
+            "ref_resource": "resume://references/multi-page-mode + resume://references/multi-page-no-photo",
+        },
     }
-    css_file = css_map.get((layout_mode, multi_page_variant), "template_1page.css")
-
-    ref_map = {
-        "Single-Page Extreme": "single-page-mode.md",
-        "Multi-Page Comfortable": "multi-page-mode.md",
-    }
-    ref_file = ref_map.get(layout_mode, "single-page-mode.md")
+    assets = asset_map.get(
+        (layout_mode, multi_page_variant),
+        asset_map[("Single-Page Extreme", "not_required")],
+    )
+    css_file = assets["css_file"]
+    css_resource = assets["css_resource"]
+    ref_file = assets["ref_file"]
+    ref_resource = assets["ref_resource"]
 
     return f"""# 流水线执行简报
 

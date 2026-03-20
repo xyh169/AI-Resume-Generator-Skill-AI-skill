@@ -84,8 +84,13 @@ Overflow (>100%)
 ### L2 Column Layout Procedure
 
 Trigger condition:
-- Current `usage > 95%`
+- Current `usage > 100%`
 - `L1` has already been applied or is not enough
+- The page still cannot fit without columnization
+
+Guardrail:
+- If the layout already fits on one page, do **not** apply `L2`.
+- If a section like `Certifications` can stay single-column without overflow, keep it single-column.
 
 Execution flow:
 
@@ -102,8 +107,8 @@ Execution flow:
    - all columns <= 60 chars -> `16px`
    - otherwise -> `20px`
 6. Re-measure after the DOM change
-7. If usage drops to `<= 95%`, persist the modified DOM back into `index.html`
-8. If usage remains `> 95%`, continue to `L3`
+7. If usage drops to `<= 100%`, persist the modified DOM back into `index.html`
+8. If usage remains `> 100%`, continue to `L3`
 
 JavaScript reference:
 
