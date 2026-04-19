@@ -1,14 +1,6 @@
 # Resume Pipeline
 
-<p align="left">
-  <a href="#overview"><img alt="Overview" src="https://img.shields.io/badge/DOCS-OVERVIEW-4B5563?style=for-the-badge"></a>
-  <a href="README_CN.md"><img alt="Chinese README" src="https://img.shields.io/badge/README-CN-FACC15?style=for-the-badge"></a>
-  <a href="#what-it-does"><img alt="What It Does" src="https://img.shields.io/badge/FEATURES-WHAT_IT_DOES-6366F1?style=for-the-badge"></a>
-  <a href="#case-gallery"><img alt="Case Gallery" src="https://img.shields.io/badge/CASE-GALLERY-4B5563?style=for-the-badge"></a>
-  <a href="#how-to-use"><img alt="How To Use" src="https://img.shields.io/badge/GET_STARTED-HOW_TO_USE-84CC16?style=for-the-badge"></a>
-  <a href="#latest-updates"><img alt="Latest Updates" src="https://img.shields.io/badge/UPDATES-WHERE_CHANGED-7C3AED?style=for-the-badge"></a>
-  <a href="#license"><img alt="License" src="https://img.shields.io/badge/LICENSE-GPL--3.0-111827?style=for-the-badge"></a>
-</p>
+
 
 <p align="left"><strong>Language:</strong> <a href="README.md">English</a> | <a href="README_CN.md">简体中文</a></p>
 
