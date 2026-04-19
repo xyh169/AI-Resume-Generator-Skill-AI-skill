@@ -28,7 +28,7 @@ description: >
 - **禁止静默跳过**：任何阶段若失败，必须停止并向用户报告，不得假装完成。
 - **禁止静默删除**：未经用户明确要求，不得删除任何中间产物，尤其不得删除 `refined_resume.md`。
 - **产物必须写到 Skill 文件夹外部**：所有生成文件必须写入 `{OUTPUT_DIR}`，不得写入 `resume-pipeline/` 内部。
-- **单页模式附加铁律**：若用户选择 `Single-Page Extreme` 或 `Single-Page Photo`，阶段三必须执行 `3-pdf-generator/SKILL.md` 中的单页测量与收敛步骤，不能只生成一个“看起来像单页”的 PDF。
+- **单页模式附加铁律**：若用户选择 `Single-Page No Photo` 或 `Single-Page With Photo`，阶段三必须执行 `3-pdf-generator/SKILL.md` 中的单页测量与收敛步骤，不能只生成一个“看起来像单页”的 PDF。
 - **岗位方向提醒铁律**：若用户未提供 JD、公司+岗位或明确的求职方向，开始阶段二前必须先提醒并询问是否需要指定方向；只有当用户明确表示“通用版 / 暂不指定 / 不需要岗位定制”等意思时，才允许跳过岗位定制。
 
 ---
@@ -63,8 +63,7 @@ description: >
 | 原始资料 | 文件路径，或用户直接粘贴的纯文本/聊天记录 |
 | 参照排版模板 | 可选，供阶段二对齐结构 |
 | 目标岗位 JD / 公司+岗位 / 求职方向 | 推荐提供；若缺失，必须先提醒用户可指定方向，只有用户明确表示走通用版时才可跳过岗位定制 |
-| PDF 版式 | 只能向用户呈现 `Single-Page Extreme`、`Single-Page Photo` 或 `Multi-Page Comfortable` 三个名称 |
-| 多页变体 | 仅当用户选择 `Multi-Page Comfortable` 时需要明确：`With Photo` 或 `No Photo` |
+| PDF 版式 | 只能向用户呈现 `Single-Page No Photo`、`Single-Page With Photo`、`Multi-Page With Photo`、`Multi-Page No Photo` 四个名称 |
 | 输出文件名 | 可选，默认 `output_resume.pdf` |
 
 ### Step 0.1: 确定 `{OUTPUT_DIR}`
@@ -76,13 +75,11 @@ description: >
 ### Step 0.2: 沟通限制
 
 - 询问版式时，只允许呈现：
-  - `Single-Page Extreme`
-  - `Single-Page Photo`
-  - `Multi-Page Comfortable`
-- 若用户选择 `Multi-Page Comfortable`，或直接要求生成多页版：必须进一步确认多页变体，只允许呈现：
-  - `With Photo`
-  - `No Photo`
-- 不得静默猜测多页是否带照片，也不得把 `With Photo / No Photo` 直接替换成新的顶层版式名称。
+  - `Single-Page No Photo`
+  - `Single-Page With Photo`
+  - `Multi-Page With Photo`
+  - `Multi-Page No Photo`
+- 不得静默猜测是否带照片，也不得把这四个顶层版式名重新拆回旧的“版式 + 变体”问法。
 - 若缺少 JD、公司+岗位或明确求职方向：必须先询问一次是否需要指定；不得静默默认“通用版”。
 - 若用户明确回复“通用版”“先不定方向”“不用岗位定制”或等价意思：可继续执行通用改写，不再反复追问。
 - 不得提前评论内容是否“适合单页”。
@@ -128,7 +125,7 @@ description: >
 3. 装载可选输入：
    - 用户提供的排版模板
    - 用户提供的 JD 或公司+岗位信息
-   - 若版式为 `Multi-Page Comfortable`，则同时装载 `With Photo` 或 `No Photo` 多页变体
+   - 若版式为 `Multi-Page With Photo` 或 `Multi-Page No Photo`，则装载对应的多页分支规则
    - 若上述信息缺失，则先按 Step 0.2 询问用户是否指定求职方向；只有用户明确表示走通用版时才可继续
 4. 执行专业化重构，输出 `refined_resume.md`。
 5. 若 `refined_resume.md` 中存在叙事型经历条目（工作 / 项目 / 实习 / 校园经历），条目头行必须保持 `**标题** | 角色/组织 | 时间` 这一可解析 triplet 结构，不得用破折号、斜杠或括号替代中间的可见 `|` 分隔。
@@ -154,7 +151,7 @@ description: >
 3. 在 `{OUTPUT_DIR}` 生成 `index.html`。
 4. 生成最终 PDF。
 5. 若用户选择单页模式，必须执行该子 Skill 中的单页测量与收敛步骤。
-6. `Single-Page Extreme` 与 `Single-Page Photo` 视为两个独立单页分支；阶段三必须按各自 branch 的 `L1-L5` 规则收敛，`Single-Page Photo` 不得沿用旧的“接近满页就分栏”习惯。
+6. `Single-Page No Photo` 与 `Single-Page With Photo` 视为两个独立单页分支；阶段三必须按各自 branch 的 `L1-L5` 规则收敛，`Single-Page With Photo` 不得沿用旧的“接近满页就分栏”习惯。
 
 ### 本阶段通过条件
 
@@ -174,8 +171,7 @@ description: >
 ```bash
 python resume-pipeline/validators/validate_stage2.py \
   --output-dir "{OUTPUT_DIR}" \
-  --layout-mode "{Single-Page Extreme|Single-Page Photo|Multi-Page Comfortable}" \
-  --multi-page-variant "{With Photo|No Photo|not_required}" \
+  --layout-mode "{Single-Page No Photo|Single-Page With Photo|Multi-Page With Photo|Multi-Page No Photo}" \
   --pdf-name "{FINAL_PDF_NAME}"
 ```
 

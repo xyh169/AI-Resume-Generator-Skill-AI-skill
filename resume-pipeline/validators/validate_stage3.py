@@ -13,7 +13,33 @@ FORBIDDEN_MARKERS = [
     "TODO",
     "系统提示词",
 ]
-SINGLE_PAGE_LAYOUTS = {"Single-Page Extreme", "Single-Page Photo"}
+SINGLE_PAGE_LAYOUTS = {
+    "Single-Page No Photo",
+    "Single-Page With Photo",
+}
+
+
+def normalize_layout_mode(layout_mode: str, multi_page_variant: str) -> tuple[str, str]:
+    if layout_mode == "Single-Page No Photo":
+        return "Single-Page No Photo", "not_required"
+    if layout_mode == "Single-Page With Photo":
+        return "Single-Page With Photo", "not_required"
+    if layout_mode == "Multi-Page With Photo":
+        return "Multi-Page With Photo", "With Photo"
+    if layout_mode == "Multi-Page No Photo":
+        return "Multi-Page No Photo", "No Photo"
+
+    if layout_mode == "Single-Page Extreme":
+        return "Single-Page No Photo", "not_required"
+    if layout_mode == "Single-Page Photo":
+        return "Single-Page With Photo", "not_required"
+    if layout_mode == "Multi-Page Comfortable":
+        if multi_page_variant == "With Photo":
+            return "Multi-Page With Photo", "With Photo"
+        if multi_page_variant == "No Photo":
+            return "Multi-Page No Photo", "No Photo"
+
+    return layout_mode, multi_page_variant
 
 
 def sha256_file(path: Path) -> str:
@@ -68,7 +94,10 @@ def main() -> int:
     refined_path = output_dir / manifest.get("stage2", {}).get("artifact", "refined_resume.md")
     html_path = output_dir / manifest.get("stage3", {}).get("artifact_html", "index.html")
     pdf_path = output_dir / manifest.get("stage3", {}).get("artifact_pdf", manifest.get("pdf_name", "output_resume.pdf"))
-    layout_mode = manifest.get("layout_mode")
+    layout_mode, _ = normalize_layout_mode(
+        manifest.get("layout_mode"),
+        manifest.get("multi_page_variant", "not_required"),
+    )
     expected_refined_sha = manifest.get("stage3", {}).get("expected_refined_resume_sha256")
 
     for name, path in [

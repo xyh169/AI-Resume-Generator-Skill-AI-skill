@@ -1,8 +1,7 @@
 # Multi-Page No Photo Variant
 
 Read this file **only** when:
-- layout = `Multi-Page Comfortable`
-- variant = `No Photo`
+- layout = `Multi-Page No Photo`
 
 ## Template
 

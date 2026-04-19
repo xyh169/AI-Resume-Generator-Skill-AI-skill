@@ -11,8 +11,8 @@ from typing import Iterable
 from playwright.sync_api import sync_playwright
 
 
-ROOT = Path(__file__).resolve().parents[4]
-CSS_PATH = ROOT / "resume-pipeline" / "resume-pipeline" / "3-pdf-generator" / "resources" / "template_1page_photo.css"
+ROOT = Path(__file__).resolve().parents[3]
+CSS_PATH = ROOT / "resume-pipeline" / "3-pdf-generator" / "resources" / "template_1page_photo.css"
 
 
 @dataclass
@@ -42,7 +42,7 @@ def parse_resume(md_text: str) -> tuple[str, str, list[Section]]:
     current_lines: list[str] = []
 
     for raw in lines:
-        line = raw.rstrip()
+        line = raw.rstrip().lstrip("\ufeff")
         if line.startswith("# "):
             name = line[2:].strip()
             continue
@@ -286,7 +286,18 @@ def render_body_sections(sections: list[Section], use_l2: bool) -> tuple[str, li
     return "".join(section_html), rendered_titles
 
 
-def build_html(name: str, basic_info: list[tuple[str, str]], edu_section: Section | None, body_sections: list[Section], use_l2: bool) -> tuple[str, list[str]]:
+def to_file_uri(path: Path) -> str:
+    return path.resolve().as_uri()
+
+
+def build_html(
+    name: str,
+    basic_info: list[tuple[str, str]],
+    edu_section: Section | None,
+    body_sections: list[Section],
+    use_l2: bool,
+    photo_uri: str | None,
+) -> tuple[str, list[str]]:
     css_text = CSS_PATH.read_text(encoding="utf-8")
     intro_lines = []
     for label, value in basic_info:
@@ -305,6 +316,11 @@ def build_html(name: str, basic_info: list[tuple[str, str]], edu_section: Sectio
             )
     edu_html = render_education(edu_section) if edu_section else ""
     body_html, rendered_titles = render_body_sections(body_sections, use_l2)
+    photo_html = (
+        f'<div class="sidebar-photo"><div class="photo-box"><img src="{escape(photo_uri)}" alt="Profile photo"></div></div>'
+        if photo_uri
+        else '<div class="sidebar-photo"><div class="photo-slot">照片位</div></div>'
+    )
     html_text = f"""<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -386,7 +402,7 @@ def build_html(name: str, basic_info: list[tuple[str, str]], edu_section: Sectio
         {edu_html}
       </div>
       <div class="single-page-photo-aside">
-        <div class="sidebar-photo"><div class="photo-slot">照片位</div></div>
+        {photo_html}
       </div>
     </div>
     {body_html}
@@ -450,6 +466,7 @@ def main() -> None:
     parser.add_argument("--preview", type=Path, default=ROOT / "single_page_photo_preview.png")
     parser.add_argument("--pdf", type=Path, default=ROOT / "refined_resume3_single_page_photo.pdf")
     parser.add_argument("--measure", type=Path, default=ROOT / "single_page_photo_measure.json")
+    parser.add_argument("--photo", type=Path, default=None)
     args = parser.parse_args()
 
     md_text = args.input.read_text(encoding="utf-8")
@@ -457,15 +474,30 @@ def main() -> None:
     basic_info = parse_basic_info(contact)
     edu_section = sections[0] if sections else None
     body_sections = sections[1:] if len(sections) > 1 else []
+    photo_uri = to_file_uri(args.photo) if args.photo else None
 
-    html_without_l2, order_without_l2 = build_html(name, basic_info, edu_section, body_sections, use_l2=False)
+    html_without_l2, order_without_l2 = build_html(
+        name,
+        basic_info,
+        edu_section,
+        body_sections,
+        use_l2=False,
+        photo_uri=photo_uri,
+    )
     args.index.write_text(html_without_l2, encoding="utf-8")
     measure = render_and_measure(args.index, args.preview, args.pdf)
     use_l2 = bool(measure["usage"] > 100 and any(sec.section_type == "data" for sec in body_sections))
     rendered_order = order_without_l2
 
     if use_l2:
-        html_with_l2, rendered_order = build_html(name, basic_info, edu_section, body_sections, use_l2=True)
+        html_with_l2, rendered_order = build_html(
+            name,
+            basic_info,
+            edu_section,
+            body_sections,
+            use_l2=True,
+            photo_uri=photo_uri,
+        )
         args.index.write_text(html_with_l2, encoding="utf-8")
         measure = render_and_measure(args.index, args.preview, args.pdf)
 
@@ -480,6 +512,7 @@ def main() -> None:
         "a4Height": measure["a4Height"],
         "gap": measure["gap"],
         "sectionOrder": rendered_order,
+        "photo": str(args.photo) if args.photo else None,
     }
     args.measure.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps(result, ensure_ascii=False))

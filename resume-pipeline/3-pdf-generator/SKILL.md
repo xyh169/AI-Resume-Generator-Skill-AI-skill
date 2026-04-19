@@ -28,7 +28,7 @@ You are the **Stage 3 Agent** in the resume pipeline. Your job is to take the fi
 - **Allowed text change boundary**:
   - You may do minimal layout-preserving text normalization explicitly required by this skill, such as reflowing an education entry into a single line while preserving the same facts.
   - You must not add, fabricate, or semantically rewrite the candidate's content.
-- **Single-page iron rule**: If the user chooses `Single-Page Extreme` or `Single-Page Photo`, you must execute the browser measurement and convergence flow. Do not skip it.
+- **Single-page iron rule**: If the user chooses `Single-Page No Photo` or `Single-Page With Photo`, you must execute the browser measurement and convergence flow. Do not skip it.
 - **Output location**: All outputs must be written to `{OUTPUT_DIR}`, not inside the Skill folder.
 
 ## Stage 3 Ownership
@@ -39,21 +39,28 @@ You are the **Stage 3 Agent** in the resume pipeline. Your job is to take the fi
 
 ## Reading Path
 
-- **Multi-Page Comfortable**:
+- **Multi-Page With Photo**:
   - Read this file
   - Read `references/multi-page-mode.md`
-  - If variant is `With Photo`, read `resources/template_multipage.css`, then read `references/multi-page-with-photo-mode.md`
-  - If variant is `No Photo`, read `resources/template_multipage-2.css`, then read `references/multi-page-no-photo-mode.md`
-  - Skip the single-page reference file
-- **Single-Page Extreme**:
+  - Read `resources/template_multipage.css`
+  - Read `references/multi-page-with-photo-mode.md`
+  - Skip the single-page reference files
+- **Multi-Page No Photo**:
+  - Read this file
+  - Read `references/multi-page-mode.md`
+  - Read `resources/template_multipage-2.css`
+  - Read `references/multi-page-no-photo-mode.md`
+  - Skip the single-page reference files
+- **Single-Page No Photo**:
   - Read this file
   - Read `resources/template_1page.css`
-  - Then read `references/single-page-mode.md`
+  - Read `references/single-page-mode.md`
   - Follow the measurement/convergence process there before rendering the PDF
-- **Single-Page Photo**:
+- **Single-Page With Photo**:
   - Read this file
   - Read `resources/template_1page_photo.css`
-  - Then read `references/single-page-photo-mode.md`
+  - Read `references/single-page-photo-mode.md`
+  - Read `references/single-page-mode.md`
   - Follow the measurement/convergence process there before rendering the PDF
 
 ## Prerequisites & Environment
@@ -67,22 +74,19 @@ You are the **Stage 3 Agent** in the resume pipeline. Your job is to take the fi
 
 **Step 1: Understand User Requirements**
 - Identify the source material (the user's unstructured text, DOCX, etc.).
-- Accepted layout names are `Single-Page Extreme`, `Single-Page Photo`, and `Multi-Page Comfortable`.
-- `Single-Page Photo` is a separate top-level layout and uses `resources/template_1page_photo.css`.
-- Identify the user's preferred layout: `Single-Page Extreme` (uses `resources/template_1page.css`) or `Multi-Page Comfortable` (uses a multi-page template). If not specified, ask the user to choose — present only these two options by name, without making any judgment about whether the content will or won't fit in one page. Content feasibility is handled automatically by the pipeline; do not speculate about it.
-- If the user selects `Multi-Page Comfortable`, identify the multi-page variant:
-  - `With Photo` -> use `resources/template_multipage.css`
-  - `No Photo` -> use `resources/template_multipage-2.css`
-- If the user selects multi-page but does not specify the variant, ask a follow-up using only `With Photo` and `No Photo`.
+- Accepted layout names are `Single-Page No Photo`, `Single-Page With Photo`, `Multi-Page With Photo`, and `Multi-Page No Photo`.
+- `Single-Page With Photo` is a separate top-level layout and uses `resources/template_1page_photo.css`.
+- Identify the user's preferred layout from these four explicit options. If not specified, ask the user to choose and present only these four names, without making any judgment about whether the content will or won't fit in one page. Content feasibility is handled automatically by the pipeline; do not speculate about it.
 
 **Step 2: Generate the HTML Structure**
 You must act as the CSS/DOM architect and generate an `index.html` file in the output directory (`OUTPUT_DIR`, determined by the upstream Master Workflow — typically the directory where the user's source file resides, **outside** the Skill folder).
-1. Read the exact content of the chosen CSS file (`resources/template_1page.css`, `resources/template_multipage.css`, or `resources/template_multipage-2.css`) from this repository.
-   - For `Single-Page Photo`, use `resources/template_1page_photo.css`.
-   - For `Multi-Page Comfortable + With Photo`, use `resources/template_multipage.css`.
-   - For `Multi-Page Comfortable + No Photo`, use `resources/template_multipage-2.css`.
+1. Read the exact content of the chosen CSS file (`resources/template_1page.css`, `resources/template_1page_photo.css`, `resources/template_multipage.css`, or `resources/template_multipage-2.css`) from this repository.
+   - For `Single-Page No Photo`, use `resources/template_1page.css`.
+   - For `Single-Page With Photo`, use `resources/template_1page_photo.css`.
+   - For `Multi-Page With Photo`, use `resources/template_multipage.css`.
+   - For `Multi-Page No Photo`, use `resources/template_multipage-2.css`.
 2. Extract the user's professional information and map it strictly to the following DOM structure. DO NOT invent new classes.
-   - Exception: `Single-Page Photo` may use the dedicated wrapper classes defined in the variant skeleton below.
+   - Exception: `Single-Page With Photo` may use the dedicated wrapper classes defined in the variant skeleton below.
 3. **Dynamic Font-Size Injection**: The CSS template does NOT preset `font-size`. You must determine appropriate font sizes based on content volume and inject them into the `<style>` block.
 
 ### Font & Typography Rules
@@ -108,7 +112,7 @@ h1 (name) >> h2 (section title) > item-title (entry title) ≥ body (body text)
 
 | 类型 | 包含的 Section | 特征 |
 |------|---------------|------|
-| **描述型** | 工作经历、项目经历、实习经历、校园经历、个人总结 | 每条 bullet 是长段落（STAR 描述），通常 40–120 字 |
+| **描述型** | 工作经历、项目经历、实习经历、校园经历 | 每条 bullet 是长段落（STAR 描述），通常 40–120 字 |
 | **数据型** | 科研成果、荣誉奖项、证书资质、专业技能、语言能力 | 每条是短条目（列数据），通常 10–40 字 |
 
 > 教育背景有专用的 `.edu-item` 布局，不参与分栏分类。描述型 section **永远不分栏**，无论测量结果如何。
@@ -137,7 +141,7 @@ h1 (name) >> h2 (section title) > item-title (entry title) ≥ body (body text)
             <p><strong>电话</strong>: ... | <strong>邮箱</strong>: ... | <strong>其他信息</strong>: ...</p>
         </div>
 
-        <!-- ====== 多页版可选：基本信息 + 右侧照片（仅 Multi-Page Comfortable + With Photo） ====== -->
+        <!-- ====== 多页版可选：基本信息 + 右侧照片（仅 Multi-Page With Photo） ====== -->
         <div class="section">
             <div class="section-title"><h2>基本信息</h2></div>
             <div class="section-content">
@@ -154,7 +158,7 @@ h1 (name) >> h2 (section title) > item-title (entry title) ≥ body (body text)
                 </div>
             </div>
         </div>
-        <!-- Multi-Page Comfortable + No Photo: omit this entire block by default -->
+        <!-- Multi-Page No Photo: omit this entire block by default -->
 
         <!-- ====== 教育背景（必选） ====== -->
         <div class="section">
@@ -165,18 +169,6 @@ h1 (name) >> h2 (section title) > item-title (entry title) ≥ body (body text)
                         <div><span class="edu-school">学校名</span> | <span class="edu-major">专业</span><span class="edu-detail">学位</span></div>
                         <div class="item-date">起止时间</div>
                     </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ====== 个人总结（可选：有则写，无则省略整块） ====== -->
-        <div class="section">
-            <div class="section-title"><h2>个人总结</h2></div>
-            <div class="section-content">
-                <div class="item">
-                    <ul>
-                        <li><span class="k">亮点关键词</span>：概括性描述...</li>
-                    </ul>
                 </div>
             </div>
         </div>
@@ -322,9 +314,9 @@ h1 (name) >> h2 (section title) > item-title (entry title) ≥ body (body text)
 </html>
 ```
 
-### Single-Page Photo Layout Skeleton
+### Single-Page With Photo Layout Skeleton
 
-When the user selects `Single-Page Photo`, use the dedicated **top-photo intro shell** below. Keep `.section`, `.section-title`, `.section-content`, and `.item` intact.
+When the user selects `Single-Page With Photo`, use the dedicated **top-photo intro shell** below. Keep `.section`, `.section-title`, `.section-content`, and `.item` intact.
 
 ```html
 <!DOCTYPE html>
@@ -378,21 +370,31 @@ When the user selects `Single-Page Photo`, use the dedicated **top-photo intro s
 </html>
 ```
 
-### Multi-Page Comfortable Addendum
+### Multi-Page With Photo Addendum
 
-If the user selected `Multi-Page Comfortable`, you MUST read and follow:
+If the user selected `Multi-Page With Photo`, you MUST read and follow:
 - `references/multi-page-mode.md`
-- If variant is `With Photo`, also read `references/multi-page-with-photo-mode.md`
-- If variant is `No Photo`, also read `references/multi-page-no-photo-mode.md`
+- `references/multi-page-with-photo-mode.md`
 
 Use the shared multi-page reference file for:
 - content-aware blue guide line rules
 - page-break and cross-page constraints
 - other multi-page-only shared constraints
 
-### Single-Page Extreme Addendum
+### Multi-Page No Photo Addendum
 
-If the user selected `Single-Page Extreme`, you MUST read and follow:
+If the user selected `Multi-Page No Photo`, you MUST read and follow:
+- `references/multi-page-mode.md`
+- `references/multi-page-no-photo-mode.md`
+
+Use the shared multi-page reference file for:
+- content-aware blue guide line rules
+- page-break and cross-page constraints
+- other multi-page-only shared constraints
+
+### Single-Page No Photo Addendum
+
+If the user selected `Single-Page No Photo`, you MUST read and follow:
 - `references/single-page-mode.md`
 
 Use the single-page reference file for:
@@ -401,9 +403,9 @@ Use the single-page reference file for:
 - target usage interpretation and stop conditions
 - single-page-only layout guardrails
 
-### Single-Page Photo Addendum
+### Single-Page With Photo Addendum
 
-If the user selected `Single-Page Photo`, you MUST read and follow:
+If the user selected `Single-Page With Photo`, you MUST read and follow:
 - `references/single-page-photo-mode.md`
 - `references/single-page-mode.md`
 
@@ -446,13 +448,13 @@ Run the core python compiler script provided in this repository to render the HT
 - **Line-Height Floor**: 🔒 Line-height minimum is 1.5. Never reduce it.
 - **Font Floor**: Never set body font-size below 9.5pt.
 - **Measurement Correctness**: Always remove `min-height`, `max-height`, and `overflow` before measuring real content height. Failure to do so will return a fake gap of 0.
-- **Photo Header Shell**: For `Single-Page Photo`, only the top intro area is photo-aware. The body below must remain the usual single-column flow unless the old single-page degradation rules temporarily apply column helpers.
-- **Reuse Old Degradation**: For `Single-Page Photo`, reuse the old `Single-Page Extreme` degradation and expansion rules instead of inventing a new sidebar balancing algorithm.
+- **Photo Header Shell**: For `Single-Page With Photo`, only the top intro area is photo-aware. The body below must remain the usual single-column flow unless the old single-page degradation rules temporarily apply column helpers.
+- **Reuse Old Degradation**: For `Single-Page With Photo`, reuse the old `Single-Page No Photo` degradation and expansion rules instead of inventing a new sidebar balancing algorithm.
 - **No Unnecessary L2**: If the page already fits, keep data sections single-column; `L2` is only for fixing real overflow.
 - **Target Fill Rate**: Aim for 93%–98% page usage. Below 85% looks empty; above 98% risks content clipping.
 - **Iterative Convergence**: Expect 2–3 measurement rounds. Never assume a single adjustment will be correct. Always re-measure after changes.
 - **Text Encoding**: Literal labels such as `基本信息` and `照片位` must survive as valid UTF-8 text. Do not emit `?` placeholder glyphs for fixed labels.
 - **Multiplicative Caution**: `font-size` and `line-height` have multiplicative effects — a small change applies to every line and compounds quickly. Adjust incrementally (+0.3–0.5pt per round).
-- **Single-Page Branch Isolation**: `template_1page.css` + `references/single-page-mode.md` remain the old single-page branch. `template_1page_photo.css` + `references/single-page-photo-mode.md` are a separate single-page-with-photo branch. Do not merge or overwrite either branch.
+- **Single-Page Branch Isolation**: `template_1page.css` + `references/single-page-mode.md` remain the `Single-Page No Photo` branch. `template_1page_photo.css` + `references/single-page-photo-mode.md` are the separate `Single-Page With Photo` branch. Do not merge or overwrite either branch.
 - **Multi-Page Isolation**: Content-aware guide-line rules remain a **multi-page-only** update. Do not retrofit them into either single-page branch unless explicitly requested.
-- **Multi-Page Variant Isolation**: `template_multipage.css` is the `With Photo` variant; `template_multipage-2.css` is the `No Photo` variant. Do not mix their DOM expectations.
+- **Multi-Page Variant Isolation**: `template_multipage.css` is the `Multi-Page With Photo` branch; `template_multipage-2.css` is the `Multi-Page No Photo` branch. Do not mix their DOM expectations.

@@ -1,10 +1,10 @@
-# Single-Page Photo Mode Reference
+# Single-Page With Photo Mode Reference
 
-Read this file **only** when the selected layout is `Single-Page Photo`.
+Read this file **only** when the selected layout is `Single-Page With Photo`.
 
 ## Scope
 
-This mode is a **top-photo variant** of the old single-page flow. It does **not** replace or modify the old `Single-Page Extreme` branch.
+This mode is a **top-photo variant** of the old single-page flow. It does **not** replace or modify the old `Single-Page No Photo` branch.
 
 Use:
 - `resources/template_1page_photo.css`
@@ -120,7 +120,7 @@ Rules:
 
 ## 2.5.4 Photo-Mode Adaptive Strategy
 
-`Single-Page Photo` is its **own branch** and should be reasoned about as its own degradation sequence.
+`Single-Page With Photo` is its **own branch** and should be reasoned about as its own degradation sequence.
 
 It still reuses the old single-page measurement method, parameter ranges, expansion strategy, and convergence loop from `single-page-mode.md`, but the actual overflow steps for this branch are:
 
@@ -153,7 +153,7 @@ All other adaptive ranges follow `single-page-mode.md`.
 
 ## Critical Guardrails
 
-- This is still a **separate branch**, not a mutation of `Single-Page Extreme`.
+- This is still a **separate branch**, not a mutation of `Single-Page No Photo`.
 - Keep the old `template_1page.css` and `single-page-mode.md` untouched.
 - The body below the photo intro area is still a single-column resume body.
 - Do **not** revive the previous photo-mode sidebar-combination search.

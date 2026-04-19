@@ -12,12 +12,10 @@ NARRATIVE_TITLES = {
     "项目经历",
     "实习经历",
     "校园经历",
-    "个人总结",
     "Work Experience",
     "Projects",
     "Internship Experience",
     "Extracurricular Activities",
-    "Summary",
 }
 
 DATA_TITLES = {
@@ -43,8 +41,50 @@ FORBIDDEN_MARKERS = [
     "系统提示词",
 ]
 
+FORBIDDEN_SECTION_TITLES = {
+    "个人总结",
+    "Summary",
+}
+
 SECTION_RE = re.compile(r"^##\s+(.+?)(?:\s+<!--\s*type:\s*(narrative|data)\s*-->)?\s*$")
-SINGLE_PAGE_LAYOUTS = {"Single-Page Extreme", "Single-Page Photo"}
+CANONICAL_LAYOUT_CHOICES = [
+    "Single-Page No Photo",
+    "Single-Page With Photo",
+    "Multi-Page With Photo",
+    "Multi-Page No Photo",
+]
+LEGACY_LAYOUT_CHOICES = [
+    "Single-Page Extreme",
+    "Single-Page Photo",
+    "Multi-Page Comfortable",
+]
+SINGLE_PAGE_LAYOUTS = {
+    "Single-Page No Photo",
+    "Single-Page With Photo",
+}
+
+
+def normalize_layout_mode(layout_mode: str, multi_page_variant: str) -> tuple[str, str]:
+    if layout_mode == "Single-Page No Photo":
+        return "Single-Page No Photo", "not_required"
+    if layout_mode == "Single-Page With Photo":
+        return "Single-Page With Photo", "not_required"
+    if layout_mode == "Multi-Page With Photo":
+        return "Multi-Page With Photo", "With Photo"
+    if layout_mode == "Multi-Page No Photo":
+        return "Multi-Page No Photo", "No Photo"
+
+    if layout_mode == "Single-Page Extreme":
+        return "Single-Page No Photo", "not_required"
+    if layout_mode == "Single-Page Photo":
+        return "Single-Page With Photo", "not_required"
+    if layout_mode == "Multi-Page Comfortable":
+        if multi_page_variant == "With Photo":
+            return "Multi-Page With Photo", "With Photo"
+        if multi_page_variant == "No Photo":
+            return "Multi-Page No Photo", "No Photo"
+
+    return layout_mode, multi_page_variant
 
 
 def sha256_file(path: Path) -> str:
@@ -74,14 +114,14 @@ def main() -> int:
     parser.add_argument(
         "--layout-mode",
         required=True,
-        choices=["Single-Page Extreme", "Single-Page Photo", "Multi-Page Comfortable"],
+        choices=CANONICAL_LAYOUT_CHOICES + LEGACY_LAYOUT_CHOICES,
         help="Layout mode selected for the workflow",
     )
     parser.add_argument(
         "--multi-page-variant",
         choices=["With Photo", "No Photo", "not_required"],
         default="not_required",
-        help="Optional multi-page variant metadata for Multi-Page Comfortable runs",
+        help="Optional legacy multi-page variant metadata",
     )
     parser.add_argument(
         "--pdf-name",
@@ -100,6 +140,10 @@ def main() -> int:
         help="Optional explicit path for the handoff manifest",
     )
     args = parser.parse_args()
+    normalized_layout_mode, normalized_multi_page_variant = normalize_layout_mode(
+        args.layout_mode,
+        args.multi_page_variant,
+    )
 
     output_dir = Path(args.output_dir).resolve()
     raw_path = output_dir / "raw_content.md"
@@ -165,11 +209,14 @@ def main() -> int:
     mismatched_type_annotations = []
     unknown_titles = []
     recognized_titles = []
+    forbidden_section_titles = []
 
     for section in sections:
         title = section["title"]
         section_type = section["type"]
         expected = None
+        if title in FORBIDDEN_SECTION_TITLES:
+            forbidden_section_titles.append(title)
         if title in NARRATIVE_TITLES:
             expected = "narrative"
             recognized_titles.append(title)
@@ -199,6 +246,15 @@ def main() -> int:
 
     add_check(
         checks,
+        "summary_sections_absent",
+        not forbidden_section_titles,
+        "none found" if not forbidden_section_titles else ", ".join(sorted(set(forbidden_section_titles))),
+    )
+    if forbidden_section_titles:
+        failures.append("Summary/self-evaluation sections are not allowed in refined_resume.md")
+
+    add_check(
+        checks,
         "required_type_annotations_present",
         not missing_type_annotations and not mismatched_type_annotations,
         json.dumps(
@@ -222,8 +278,10 @@ def main() -> int:
     manifest = {
         "schema_version": "1.0",
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "layout_mode": args.layout_mode,
-        "multi_page_variant": args.multi_page_variant,
+        "layout_mode": normalized_layout_mode,
+        "multi_page_variant": normalized_multi_page_variant,
+        "input_layout_mode": args.layout_mode,
+        "input_multi_page_variant": args.multi_page_variant,
         "pdf_name": args.pdf_name,
         "must_keep_files": ["raw_content.md", "refined_resume.md"],
         "stage1": {
@@ -239,20 +297,29 @@ def main() -> int:
             "typed_sections": [section for section in sections if section["type"] is not None],
             "missing_type_annotations": missing_type_annotations,
             "unknown_titles": unknown_titles,
+            "forbidden_section_titles": forbidden_section_titles,
             "forbidden_markers_found": forbidden_hits,
         },
         "stage3": {
             "artifact_html": "index.html",
             "artifact_pdf": args.pdf_name,
-            "multi_page_variant": args.multi_page_variant,
+            "multi_page_variant": normalized_multi_page_variant,
             "text_rewrite_forbidden": True,
             "expected_refined_resume_sha256": sha256_file(refined_path),
         },
     }
 
+    if (
+        args.layout_mode != normalized_layout_mode
+        or args.multi_page_variant != normalized_multi_page_variant
+    ):
+        warnings.append(
+            "Legacy layout naming was normalized to "
+            f"{normalized_layout_mode} / {normalized_multi_page_variant}"
+    )
     if args.layout_mode == "Multi-Page Comfortable" and args.multi_page_variant == "not_required":
-        warnings.append("Multi-page variant not specified; Stage 3 may still need to ask for With Photo or No Photo")
-    if args.layout_mode in SINGLE_PAGE_LAYOUTS and args.multi_page_variant != "not_required":
+        warnings.append("Legacy Multi-Page Comfortable input is missing an explicit photo choice")
+    if normalized_layout_mode in SINGLE_PAGE_LAYOUTS and args.multi_page_variant != "not_required":
         warnings.append("Single-page runs should not carry a multi-page variant")
 
     manifest_written = False

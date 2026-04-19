@@ -1,6 +1,6 @@
 ---
 name: resume-transcriptor
-description: 严格执行 Stage 2 文本重构。用于把原始简历材料或 `raw_content.md` 重写为专业、ATS 兼容、结构化的 `refined_resume.md`，并在单页模式下仅通过文本层密度调整为下游排版做准备。禁止生成 HTML、CSS、PDF，禁止越权执行 Stage 3 的排版职责。
+description: 严格执行 Stage 2 文本重构。用于把原始简历材料或 `raw_content.md` 重写为专业、ATS 兼容、结构化的 `refined_resume.md`，并在单页模式下仅通过文本层密度调整为下游排版做准备。支持可选的候选人事实库、本地知识库和 RAG 检索上下文，用于 JD 匹配、证据追踪、缺口识别和岗位定制。禁止生成 HTML、CSS、PDF，禁止越权执行 Stage 3 的排版职责。
 ---
 
 # 简历降噪与专业化重构技能 (Resume Transcriptor)
@@ -21,14 +21,19 @@ description: 严格执行 Stage 2 文本重构。用于把原始简历材料或 
   - 字号、padding、分栏、浏览器测量、PDF 渲染
   - 任何属于 `3-pdf-generator` 的排版收敛动作
 - **事实边界**：只能做清洗、重构、取舍和已有信息展开，绝不捏造经历、数据、结果。
+- **证据边界**：若装载候选人事实库或 RAG 检索结果，只能使用有原始来源、证据强度和用户授权边界的事实；不得把岗位画像、行业知识或 JD 要求改写成候选人的真实经历。
 - **单页模式边界**：若用户要求单页，你只能通过文本密度调整帮助下游收敛，不能自己做版式决策。
 - **交付红线**：不得删除 `raw_content.md`，不得跳过 `refined_resume.md`，不得在最终内容里混入解释性旁白、分析过程或给下游的聊天式备注。
+- **Summary 禁令**：最终简历不得包含“个人总结”/`Summary`/“自我评价”类 section；相关信息必须拆解并归入教育、经历、项目、技能、荣誉等事实型 section，而不是单独保留概述块。
 
 ## Stage 2 Ownership
 
 - 你负责：
   - 求职方向理解
   - JD 匹配
+  - 候选人事实库装载与证据映射
+  - 本地 RAG 检索上下文筛选
+  - 缺口识别与补问清单
   - ATS 兼容 section 设计
   - STAR 化重写
   - 单页文本密度预检
@@ -57,6 +62,12 @@ description: 严格执行 Stage 2 文本重构。用于把原始简历材料或 
 
 ---
 
+## Optional References
+
+- 需要构建或使用候选人事实库、本地数据库、RAG 检索或证据映射时，读取 `references/candidate-knowledge-base.md`。
+- 目标方向涉及产品经理、AI Agent 工程师、医疗健康或金融科技时，读取 `references/domain-role-examples.md` 作为岗位/行业标签和示例写法的种子；真实投递前仍需以用户提供的 JD 或最新检索结果为准。
+- 参考文件只能影响“如何选择与表达候选人已有事实”，不能成为编造候选人经历的来源。
+
 ## Workflow Steps
 
 ### Step 1: 意图探测与 JD (Job Description) 收集
@@ -67,11 +78,31 @@ description: 严格执行 Stage 2 文本重构。用于把原始简历材料或 
   - 若用户补充了方向/JD：回到分支 A 或 B 执行定制化重构。
   - 若用户明确表示“通用版”“暂不指定方向”“不用岗位定制”或等价意思：跳过岗位定制，执行标准化的通用专业改写。
   - 不得在未询问的情况下静默默认走通用版。
+- 若用户只给出宽泛方向（如“产品经理 + 医疗/金融”或“AI Agent 工程师 + 医疗/金融”），读取 `references/domain-role-examples.md` 建立目标画像，再提醒用户真实投递前最好补充具体 JD。
 
 ### Step 2: 读取原料并装载排版”标尺”
 - 识别并读取用户提供的**原始资料**，默认输入为 `{OUTPUT_DIR}/raw_content.md`。
 - 若用户明确提供了可直接作为 Stage 2 输入的 Markdown 原料，也必须以输出 `refined_resume.md` 为目标，不得直接把原文件名交给 Stage 3。
 - 在内存中装载指定的**参照排版模板**（如有），严格对齐其章节划分与 Markdown 层级（`#`、`##`、`###`、`-`、`**`）。
+
+### Step 2.5: 可选候选人知识库与 RAG 上下文装载
+
+仅在以下任一条件满足时执行本步骤：
+
+- 用户要求构建候选人资料库、本地数据库、长期素材库或 RAG。
+- 用户提供了大量历史资料，单轮上下文难以稳定覆盖。
+- 用户指定了多个目标方向，需要在事实层做角色/行业标签筛选。
+- 当前任务需要判断“哪些经历能支持 JD，哪些要求没有证据支撑”。
+
+执行要求：
+
+- 读取 `references/candidate-knowledge-base.md`，按其中 schema 将候选人原始材料拆成可追溯事实。
+- 候选人事实库默认写在用户确认的工作目录或 `{OUTPUT_DIR}/candidate_knowledge/`，不得写入 `resume-pipeline/` skill 目录。
+- 每条事实必须保留 `source_ref`、`evidence_strength`、`role_targets`、`domain_tags` 和 `embedding_text`。
+- 若事实库已存在，优先读取现有 `candidate_facts.jsonl`，不要重复生成冲突条目；新增事实需保持可追溯。
+- 若使用 RAG 检索，先把 JD 拆成岗位、行业、硬技能、职责、合规/风险要求和关键词，再检索候选人事实。
+- 对检索结果建立三类输出：强匹配事实、可弱化使用事实、缺口/需补问事项。
+- 不得把检索分数、证据表、gap analysis 或内部标签写入最终 `refined_resume.md`。
 
 #### 准则 0（优先级最高）：ATS/AI 兼容的标准 Section 标题
 
@@ -88,7 +119,6 @@ description: 严格执行 Stage 2 文本重构。用于把原始简历材料或 
 | **项目经历** | 项目 | 项目经验、项目经历与实验平台经验、科研经历 |
 | **实习经历** | 实习 | 实习经验、实习工作 |
 | **专业技能** | 技能、技术 | 技术专长、个人技能、核心能力、技能清单 |
-| **个人总结** | 总结、概述、简介 | 个人优势、自我评价、个人优势与岗位匹配度、求职意向说明 |
 | **荣誉奖项** | 荣誉、奖项、获奖 | 成果与荣誉、所获荣誉、奖项与成就 |
 | **科研成果** | 论文、专利、发表 | 学术成果、研究成果、发表与专利 |
 | **校园经历** | 校园、社团、学生 | 课外活动、社团经历、学生工作 |
@@ -104,7 +134,6 @@ description: 严格执行 Stage 2 文本重构。用于把原始简历材料或 
 | **Projects** | project |
 | **Internship Experience** | internship, intern |
 | **Skills** | skill, technical, proficiency |
-| **Summary** | summary, profile, objective |
 | **Honors & Awards** | honor, award, achievement |
 | **Publications** | publication, paper, patent |
 | **Extracurricular Activities** | extracurricular, activity, club |
@@ -119,6 +148,7 @@ description: 严格执行 Stage 2 文本重构。用于把原始简历材料或 
 4. **不要生造标题**：如果某类内容在标准表中没有对应项，优先合并到最接近的标准标题下，而非自创新标题。
 5. **标题语言与简历语言一致**：中文简历用中文标题，英文简历用英文标题，不要中英混用。
 6. **Section 顺序**：教育背景紧随 header 之后（中国大陆求职惯例），其余按与目标岗位的相关度降序排列。如果有 JD，最匹配的经历 section 排最前。
+7. **不要输出概述型 summary section**：即使原始素材里有“个人总结”“Summary”“自我评价”等段落，也必须改写并吸收到更具体的 section 中，不能在 `refined_resume.md` 里单独保留这类标题。
 
 #### 准则 0.5：Section 内容分类标注
 
@@ -133,7 +163,7 @@ description: 严格执行 Stage 2 文本重构。用于把原始简历材料或 
 
 | 类型 | 标注 | 包含的 Section | 特征 |
 |------|------|---------------|------|
-| **描述型** | `<!-- type: narrative -->` | 工作经历、项目经历、实习经历、校园经历、个人总结 | 每条 bullet 是长段落（STAR 描述），通常 40–120 字 |
+| **描述型** | `<!-- type: narrative -->` | 工作经历、项目经历、实习经历、校园经历 | 每条 bullet 是长段落（STAR 描述），通常 40–120 字 |
 | **数据型** | `<!-- type: data -->` | 科研成果、荣誉奖项、证书资质、专业技能、语言能力 | 每条是短条目（列数据），通常 10–40 字 |
 
 > 教育背景不需要标注，下游有专用布局。
@@ -164,10 +194,12 @@ description: 严格执行 Stage 2 文本重构。用于把原始简历材料或 
 #### 准则 A：按 JD 提炼相关性体验（如果在 Step 1 中获取了 JD）
 - 依据获取到的 JD 标准，在重写时**重点提炼并加粗**用户经历中与该岗位强相关的业务模块或技术栈。
 - 弱化或合并与岗位无关的历史经历，用寸土寸金的 A4 版面着重展示匹配度最高的核心能力。
+- 若 Step 2.5 已装载事实库或 RAG 结果，优先使用强匹配事实；弱匹配事实只能作为补充背景；缺口项必须转化为用户补问或直接省略，不能硬写进简历。
 
 #### 准则 B：严禁主观捏造与夸大
 - 只能做**减法**（去除无用废话、情绪表达）和**重构**（整理从句、提炼逻辑）。
 - 绝不替用户捏造原本不存在的数据与结果。
+- 行业画像、岗位关键词、标准协议、监管要求只能用于筛选与措辞对齐，不能当作候选人已经做过的项目或掌握的技能。
 
 #### 准则 C：摒弃弱势口语化，启用标准化动词
 将松散的口吻替换为结构清晰的职场用语。
@@ -182,8 +214,8 @@ description: 严格执行 Stage 2 文本重构。用于把原始简历材料或 
 
 ### Step 3.5: 单页排版可行性预检（仅当用户要求单页模式时执行）
 
-> 🔒 **触发条件**：当且仅当用户明确要求使用 `Single-Page Extreme` 或 `Single-Page Photo`（任一单页模式）时，才执行本步骤。若用户选择多页模式或未指定，跳过此步骤直接进入 Step 4。
-> For `Single-Page Photo`, keep the text density slightly tighter than the old single-page mode because the fixed photo sidebar reduces usable text width.
+> 🔒 **触发条件**：当且仅当用户明确要求使用 `Single-Page No Photo` 或 `Single-Page With Photo`（任一单页模式）时，才执行本步骤。若用户选择多页模式或未指定，跳过此步骤直接进入 Step 4。
+> For `Single-Page With Photo`, still keep the text density slightly tighter than `Single-Page No Photo` because the fixed photo sidebar reduces usable text width; however, compared with the old rule set, you may allow a modestly higher content ceiling before forcing text cuts.
 > Stage 3 owns the branch-specific `L1-L5` convergence rules; Stage 2 only prepares text density and stable Markdown structure.
 
 #### 快速执行原则
@@ -211,15 +243,19 @@ description: 严格执行 Stage 2 文本重构。用于把原始简历材料或 
 
 **第一级：Bullet 数量粗筛**
 统计输出 Markdown 中所有 `- ` 开头的列表项总数。
-- ≤ 18 个 → ✅ 轻量内容，直接进入第二级检查
-- 19–26 个 → ⚠️ 中等内容，进入第二级检查
-- \> 26 个 → 🔴 大概率溢出，直接进入第三级精算确认
+- ≤ 20 个 → ✅ 轻量内容，直接进入第二级检查
+- 21–30 个 → ⚠️ 中等内容，进入第二级检查
+- \> 30 个 → 🔴 大概率溢出，直接进入第三级精算确认
+
+> 对 `Single-Page With Photo`，若 bullet 数已达到 **29–30 个**，即使仍落在“中等内容”区间，也应按接近上限处理并优先进入第三级精算，不要过度乐观。
 
 **第二级：有效字符数细筛**
 统计 Markdown 正文的有效中文字符数（排除 Markdown 语法符号 `#`、`*`、`-`、`|` 等和纯空白行）。
-- < 950 字 → ✅ 安全通过
-- 950–1650 字 → ⚠️ 需要紧凑参数（body ≤ 10pt, padding ≤ 10mm 14mm），进入第三级确认
-- \> 1650 字 → 🔴 极限状态，进入第三级精算
+- < 1050 字 → ✅ 安全通过
+- 1050–1800 字 → ⚠️ 需要紧凑参数（body ≤ 10pt, padding ≤ 10mm 14mm），进入第三级确认
+- \> 1800 字 → 🔴 极限状态，进入第三级精算
+
+> 对 `Single-Page With Photo`，若有效字符数已达到 **1700+**，视为接近上限，必须进入第三级精算；不要仅凭第二级结果直接判断为可安全放行。
 
 **第三级：等效渲染行数精算**
 对每个 bullet 估算其渲染后占据的视觉行数，加上 section 标题与间距的固定开销：
@@ -239,9 +275,9 @@ description: 严格执行 Stage 2 文本重构。用于把原始简历材料或 
   总渲染行数 = header 行数 + Σ(section 开销) + Σ(bullet 渲染行数) + Σ(教育条目)
 
   A4 可用行数上限：
-    最紧凑（9.5pt, 1.5 行高, 10mm 13mm）≈ 55 行
-    中等（10pt, 1.5 行高, 10mm 14mm）≈ 50 行
-    宽松（11pt, 1.6 行高, 12mm 15mm）≈ 40 行
+    最紧凑（9.5pt, 1.5 行高, 10mm 13mm）≈ 58 行
+    中等（10pt, 1.5 行高, 10mm 14mm）≈ 52 行
+    宽松（11pt, 1.6 行高, 12mm 15mm）≈ 42 行
 ```
 
 #### 3.5.2 自动修正循环（静默执行，不打扰用户）
@@ -250,7 +286,7 @@ description: 严格执行 Stage 2 文本重构。用于把原始简历材料或 
 
 最大循环次数：**4 轮**。每轮结束后重新执行三级漏斗（§3.5.1）验证结果。
 
-##### 情况 A：溢出（总渲染行数 > 55，或使用最紧凑参数仍 > 100%）→ 自动精简
+##### 情况 A：溢出（总渲染行数 > 58，或使用最紧凑参数仍 > 100%）→ 自动精简
 
 按以下优先级逐步精简内容，每轮只执行 1–2 个操作，避免过度删减：
 
@@ -266,7 +302,7 @@ description: 严格执行 Stage 2 文本重构。用于把原始简历材料或 
 > - 绝不捏造原文中不存在的信息（遵守准则 B）
 > - 教育背景、成果荣誉等客观事实条目只压缩措辞，不删除条目本身
 
-##### 情况 B：不足（总渲染行数 ≤ 32，且即使使用最宽松参数 usage 仍 < 88%）→ 自动扩展
+##### 情况 B：不足（总渲染行数 ≤ 34，且即使使用最宽松参数 usage 仍 < 88%）→ 自动扩展
 
 按以下优先级扩充内容，每轮只执行 1–2 个操作，避免过度膨胀：
 
@@ -285,9 +321,9 @@ description: 严格执行 Stage 2 文本重构。用于把原始简历材料或 
 
 精算结果对应以下三档，内部记录 `content_volume` 判断后直接进入 Step 4：
 
-- **总渲染行数 ≤ 40 行**（宽松参数可达 88%+）：`content_volume: light`
-- **总渲染行数 41–50 行**：`content_volume: medium`
-- **总渲染行数 51–55 行**：`content_volume: heavy`
+- **总渲染行数 ≤ 42 行**（宽松参数可达 88%+）：`content_volume: light`
+- **总渲染行数 43–52 行**：`content_volume: medium`
+- **总渲染行数 53–58 行**：`content_volume: heavy`
 
 > `content_volume` 仅用于你的内部判断，不要把这类标签写进最终简历正文。
 
@@ -296,18 +332,18 @@ description: 严格执行 Stage 2 文本重构。用于把原始简历材料或 
 ```
 for round in 1..4:
     执行三级漏斗预检（§3.5.1）
-    if 40 < 总渲染行数 ≤ 55:
+    if 42 < 总渲染行数 ≤ 58:
         → 达标，标记 content_volume，退出循环，进入 Step 4
-    elif 总渲染行数 ≤ 40 且宽松参数可达 88%+:
+    elif 总渲染行数 ≤ 42 且宽松参数可达 88%+:
         → 达标（light），退出循环，进入 Step 4
-    elif 总渲染行数 > 55:
+    elif 总渲染行数 > 58:
         → 执行精简操作（情况 A），进入下一轮
     elif 宽松参数仍 < 88%:
         → 执行扩展操作（情况 B），进入下一轮
 
 if 4 轮后仍未达标:
     → 通知用户，描述具体问题：
-      - 若仍溢出："经过 4 轮自动精简，内容密度仍未收敛（当前约 XX 渲染行 vs 上限 55 行）。
+      - 若仍溢出："经过 4 轮自动精简，内容密度仍未收敛（当前约 XX 渲染行 vs 上限 58 行）。
         剩余内容均为高优先级，无法在不丢失关键信息的前提下继续缩减。
         请问您希望手动指定删除哪些条目，还是切换为多页舒适版？"
       - 若仍不足："经过 4 轮自动扩展，内容填充度仍未收敛（当前约 XX 渲染行，
@@ -334,10 +370,3 @@ if 4 轮后仍未达标:
 - 文件内容是最终 Markdown 正文
 - 文件中没有分析过程、对用户解释、对下游的聊天式指令
 - 内容语气平实、专业、克制
-
-## MCP Note
-
-本技能可作为 MCP Server 接入：
-- **Name**: `transcriptor-agent`
-- **Type**: `command`
-- **Command**: `uvx --from "/绝对路径至/transcriptor.skill/mcp-server" mcp-transcriptor`

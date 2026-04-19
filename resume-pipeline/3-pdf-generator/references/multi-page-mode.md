@@ -1,12 +1,12 @@
 # Multi-Page Shared Mode Reference
 
-Read this file **only** when the selected layout is `Multi-Page Comfortable`.
+Read this file **only** when the selected layout is `Multi-Page With Photo` or `Multi-Page No Photo`.
 
 ## Scope
 
 This file contains the **shared** rules for both multi-page variants:
-- `With Photo`
-- `No Photo`
+- `Multi-Page With Photo`
+- `Multi-Page No Photo`
 
 Do not mix these rules into the single-page flow.
 

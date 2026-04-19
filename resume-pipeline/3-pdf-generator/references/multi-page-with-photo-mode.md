@@ -1,8 +1,7 @@
 # Multi-Page With Photo Variant
 
 Read this file **only** when:
-- layout = `Multi-Page Comfortable`
-- variant = `With Photo`
+- layout = `Multi-Page With Photo`
 
 ## Template
 
@@ -22,7 +21,7 @@ Use:
 - **Photo area lives on the right**:
   - If the user provides a photo, place it inside `.photo-box`.
   - If the user wants only a reserved slot, use `.photo-slot`.
-  - If the user explicitly wants the `With Photo` variant but has not provided the image yet, using `.photo-slot` is acceptable.
+  - If the user explicitly wants the `Multi-Page With Photo` variant but has not provided the image yet, using `.photo-slot` is acceptable.
 
 - **Label punctuation**:
   - `基本信息` labels should use a Chinese full-width colon `：`.

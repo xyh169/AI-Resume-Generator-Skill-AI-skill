@@ -105,14 +105,6 @@ python convert.py -i "输入文件路径" -o "{OUTPUT_DIR}"
 
 也可以对单个文件或整个文件夹执行。
 
-## MCP Note
-
-本技能可作为 MCP Server 接入：
-
-- **Name**: `template_to_md`
-- **Type**: `command`
-- **Command**: `uvx --from "/你的路径/template-to-md/mcp-server" mcp-template-to-md`
-
 ## Failure Protocol
 
 若所有策略都失败，必须报告：

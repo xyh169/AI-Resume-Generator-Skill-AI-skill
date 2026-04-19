@@ -1,6 +1,6 @@
 # Single-Page Mode Reference
 
-Read this file **only** when the selected layout is `Single-Page Extreme`.
+Read this file **only** when the selected layout is `Single-Page No Photo`, or as the shared measurement reference for `Single-Page With Photo`.
 
 ## Table of Contents
 
